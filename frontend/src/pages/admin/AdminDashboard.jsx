@@ -42,13 +42,6 @@ export default function AdminDashboard() {
     )
   }
 
-  const holisticData = [
-    { name: 'Academic', value: metrics.avgAcademicScore },
-    { name: 'SEL Index', value: metrics.avgSELIndex },
-    { name: 'Health', value: metrics.healthCoverage },
-    { name: 'Gap', value: Math.max(0, 100 - metrics.avgAcademicScore) },
-  ]
-
   return (
     <div className="page-body">
       {/* Header */}
