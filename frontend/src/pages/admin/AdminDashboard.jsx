@@ -42,13 +42,6 @@ export default function AdminDashboard() {
     )
   }
 
-  const holisticData = [
-    { name: 'Academic', value: metrics.avgAcademicScore },
-    { name: 'SEL Index', value: metrics.avgSELIndex },
-    { name: 'Health', value: metrics.healthCoverage },
-    { name: 'Gap', value: Math.max(0, 100 - metrics.avgAcademicScore) },
-  ]
-
   return (
     <div className="page-body">
       {/* Header */}
@@ -168,10 +161,10 @@ export default function AdminDashboard() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="section-title" style={{ margin: 0 }}>Urgent Attention</h2>
-            <span className="chip chip-red">{metrics.alerts.filter(a => a.severity === 'high').length} High</span>
+            <span className="chip chip-red">{(metrics.alerts || []).filter(a => a.severity === 'high').length} High</span>
           </div>
           <div className="flex flex-col gap-2">
-            {metrics.alerts.map(alert => (
+            {(metrics.alerts || []).map(alert => (
               <div key={alert.id} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -179,9 +172,9 @@ export default function AdminDashboard() {
                 padding: 'var(--space-3)',
                 background: 'var(--slate-50)',
                 borderRadius: 'var(--radius-btn)',
-                borderLeft: `3px solid ${alertColor[alert.severity]}`,
+                borderLeft: `3px solid ${alertColor[alert.severity] || alertColor.low}`,
               }}>
-                <AlertTriangle size={14} style={{ color: alertColor[alert.severity], flexShrink: 0 }} />
+                <AlertTriangle size={14} style={{ color: alertColor[alert.severity] || alertColor.low, flexShrink: 0 }} />
                 <span style={{ fontSize: 13 }}>{alert.text}</span>
                 <span className={`chip chip-${alert.severity === 'high' ? 'red' : alert.severity === 'medium' ? 'marigold' : 'green'}`} style={{ marginLeft: 'auto' }}>
                   {alert.severity}
@@ -197,7 +190,7 @@ export default function AdminDashboard() {
             <h2 className="section-title" style={{ margin: 0 }}>Recent Activity</h2>
           </div>
           <div className="flex flex-col gap-1">
-            {metrics.recentActivity.map(act => (
+            {(metrics.recentActivity || metrics.recentActivities || []).map(act => (
               <div key={act.id} style={{
                 display: 'flex',
                 alignItems: 'flex-start',
