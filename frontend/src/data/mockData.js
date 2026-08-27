@@ -1,8 +1,8 @@
 /**
  * CFG-Diksha Mock Data
  * Comprehensive dataset for 12 students covering all teacher module features.
- *
- * Student profiles cover:
+ * Also exports legacy stubs for admin compatibility.
+ */
  *  - High performer      (Arjun Sharma, Aisha Khan)
  *  - Improving           (Priya Patel, Kavya Menon, Aryan Singh)
  *  - Stable              (Ravi Kumar, Dev Verma, Lakshmi Iyer)
@@ -821,3 +821,17 @@ export const TEACHER_PROFILE = {
   email: 'anika.reddy@diksha.edu',
   classes: ['Class A', 'Class B', 'Class C'],
 };
+
+// --- Admin compatibility stubs ---
+export const mockSchools = [];
+export const mockAreas = [];
+export const mockPrograms = [];
+export const mockTeachers = [];
+export const mockAttendanceTrend = { monthly: [], annual: [] };
+export const mockSELData = { competencies: [], trend: [] };
+export const mockAcademicData = { baselineVsEndline: [], subjectBreakdown: [] };
+export const mockHealthData = { screeningCoverage: [], bmiDistribution: [], dietarySupport: [] };
+export const mockDashboardMetrics = {};
+export const mockComparisonMetrics = [];
+export const mockCohorts = [];
+

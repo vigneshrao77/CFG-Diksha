@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Auth pages & guards
@@ -14,9 +15,18 @@ import Assessments from '../pages/teacher/Assessments';
 import Behaviour from '../pages/teacher/Behaviour';
 import Alerts from '../pages/teacher/Alerts';
 
-// Stub pages (maintained by Student/Admin teams — do not modify)
+// Admin pages & layout
+import AdminLayout from '../pages/admin/AdminLayout.jsx';
+import AdminDashboard from '../pages/admin/AdminDashboard.jsx';
+import Schools from '../pages/admin/Schools.jsx';
+import Programs from '../pages/admin/Programs.jsx';
+import Analytics from '../pages/admin/Analytics.jsx';
+import Comparisons from '../pages/admin/Comparisons.jsx';
+import Teachers from '../pages/admin/Teachers.jsx';
+import Reports from '../pages/admin/Reports.jsx';
+
+// Student Module stub
 import StudentDashboard from '../pages/student/StudentDashboard';
-import AdminDashboard from '../pages/admin/AdminDashboard';
 
 export default function AppRoutes() {
   return (
@@ -84,11 +94,19 @@ export default function AppRoutes() {
         }
       />
 
-      {/* ── Student Module (stub — maintained by student team) ─── */}
-      <Route path="/student/*" element={<StudentDashboard />} />
+      {/* ── Admin Module ────────────────────────────────────────── */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="schools" element={<Schools />} />
+        <Route path="programs" element={<Programs />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="comparisons" element={<Comparisons />} />
+        <Route path="teachers" element={<Teachers />} />
+        <Route path="reports" element={<Reports />} />
+      </Route>
 
-      {/* ── Admin Module (stub — maintained by admin team) ───── */}
-      <Route path="/admin/*" element={<AdminDashboard />} />
+      {/* ── Student Module stub ─────────────────────────────────── */}
+      <Route path="/student/*" element={<StudentDashboard />} />
 
       {/* Default & Catch-all */}
       <Route path="/" element={<Navigate to="/teacher" replace />} />
