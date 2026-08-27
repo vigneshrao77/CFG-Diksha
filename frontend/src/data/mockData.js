@@ -2,7 +2,8 @@
  * CFG-Diksha Mock Data
  * Comprehensive dataset for 12 students covering all teacher module features.
  * Also exports legacy stubs for admin compatibility.
- */
+ *
+ * Student profiles cover:
  *  - High performer      (Arjun Sharma, Aisha Khan)
  *  - Improving           (Priya Patel, Kavya Menon, Aryan Singh)
  *  - Stable              (Ravi Kumar, Dev Verma, Lakshmi Iyer)
