@@ -1,0 +1,217 @@
+/* ── SIDEBAR BASE ───────────────────────────────────────── */
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-w);
+  background: var(--ink-indigo);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width var(--transition);
+  overflow: hidden;
+}
+
+.admin-sidebar.collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+/* ── BRAND ──────────────────────────────────────────────── */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  min-height: 64px;
+}
+
+.sidebar-logo {
+  width: 36px;
+  height: 36px;
+  background: var(--marigold);
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  display: block;
+  line-height: 1.2;
+}
+
+.brand-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+/* ── TOGGLE ─────────────────────────────────────────────── */
+.sidebar-toggle {
+  position: absolute;
+  top: 20px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background: var(--white);
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-indigo);
+  cursor: pointer;
+  box-shadow: var(--shadow-dropdown);
+  z-index: 101;
+  transition: all var(--transition);
+}
+
+.sidebar-toggle:hover { background: var(--ink-indigo-10); }
+
+/* ── NAV ────────────────────────────────────────────────── */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-btn);
+  color: rgba(255,255,255,0.65);
+  font-size: 13.5px;
+  font-weight: 500;
+  position: relative;
+  transition: all var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+}
+
+/* Active state — marigold left bar */
+.nav-item.active {
+  background: rgba(255,255,255,0.12);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--marigold);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon { flex-shrink: 0; }
+.nav-label { transition: opacity var(--transition); }
+
+/* Collapsed state */
+.admin-sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+.admin-sidebar.collapsed .nav-section-label { display: none; }
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+.sidebar-footer {
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-admin-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── MOBILE BOTTOM TAB BAR ──────────────────────────────── */
+.mobile-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--ink-indigo);
+  z-index: 200;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: rgba(255,255,255,0.5);
+  font-size: 9px;
+  font-weight: 600;
+  padding: var(--space-1) var(--space-2);
+  transition: color var(--transition);
+}
+
+.mobile-tab-item.active { color: var(--marigold); }
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: var(--sidebar-w-collapsed);
+  }
+
+  .admin-sidebar .nav-item {
+    justify-content: center;
+    padding: var(--space-2);
+  }
+
+  .admin-sidebar .nav-section-label,
+  .admin-sidebar .nav-label,
+  .admin-sidebar .sidebar-brand-text,
+  .admin-sidebar .sidebar-footer {
+    display: none;
+  }
+
+  .admin-sidebar .sidebar-toggle { display: none; }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar { display: none; }
+  .mobile-tab-bar { display: flex; }
+}

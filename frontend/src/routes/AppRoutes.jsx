@@ -5,6 +5,31 @@ import {
   Bell, Sparkles, X, HeartHandshake
 } from 'lucide-react';
 
+// Auth pages & guards
+import TeacherLogin from '../pages/auth/TeacherLogin';
+import TeacherRegister from '../pages/auth/TeacherRegister';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
+
+// Teacher pages
+import TeacherDashboard from '../pages/teacher/TeacherDashboard';
+import TeacherStudents from '../pages/teacher/TeacherStudents';
+import Attendance from '../pages/teacher/Attendance';
+import HealthCheckup from '../pages/teacher/HealthCheckup';
+import Assessments from '../pages/teacher/Assessments';
+import Behaviour from '../pages/teacher/Behaviour';
+import Alerts from '../pages/teacher/Alerts';
+
+// Admin pages & layout
+import AdminLayout from '../pages/admin/AdminLayout.jsx';
+import AdminDashboard from '../pages/admin/AdminDashboard.jsx';
+import Schools from '../pages/admin/Schools.jsx';
+import Programs from '../pages/admin/Programs.jsx';
+import Analytics from '../pages/admin/Analytics.jsx';
+import Comparisons from '../pages/admin/Comparisons.jsx';
+import Teachers from '../pages/admin/Teachers.jsx';
+import Reports from '../pages/admin/Reports.jsx';
+
+// Student pages
 import StudentDashboard from '../pages/student/StudentDashboard';
 import MyProgress from '../pages/student/MyProgress';
 import Leaderboard from '../pages/student/Leaderboard';
@@ -16,7 +41,6 @@ function StudentLayout({ children }) {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Student Navigation Items (Tests module completely removed)
   const navItems = [
     { path: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/student/progress', label: 'My Progress', icon: TrendingUp },
@@ -56,7 +80,7 @@ function StudentLayout({ children }) {
           })}
         </nav>
 
-        {/* Marigold Special Action Button */}
+        {/* Marigold Action Button */}
         <div style={styles.sidebarFooter}>
           <Link to="/student/sel-analysis" style={styles.marigoldGiveBtn}>
             <HeartHandshake size={16} /> Start SEL Analysis
@@ -134,24 +158,6 @@ function StudentLayout({ children }) {
           {children}
         </main>
       </div>
-
-      {/* Mobile Bottom Tab Bar */}
-      <nav style={styles.mobileBottomBar}>
-        {navItems.map(item => {
-          const Icon = item.icon;
-          const isActive = location.pathname.startsWith(item.path);
-          return (
-            <Link 
-              key={item.path} 
-              to={item.path} 
-              style={isActive ? styles.mobileTabActive : styles.mobileTab}
-            >
-              <Icon size={20} />
-              <span style={styles.mobileTabLabel}>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
     </div>
   );
 }
@@ -159,22 +165,93 @@ function StudentLayout({ children }) {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
-      <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
+      {/* ── Public Auth Routes ──────────────────────────────────── */}
+      <Route path="/login" element={<TeacherLogin />} />
+      <Route path="/register" element={<TeacherRegister />} />
+      <Route path="/teacher/login" element={<Navigate to="/login" replace />} />
 
+      {/* ── Protected Teacher Module ────────────────────────────── */}
+      <Route
+        path="/teacher"
+        element={
+          <ProtectedRoute>
+            <TeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/students"
+        element={
+          <ProtectedRoute>
+            <TeacherStudents />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/attendance"
+        element={
+          <ProtectedRoute>
+            <Attendance />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/health"
+        element={
+          <ProtectedRoute>
+            <HealthCheckup />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/assessments"
+        element={
+          <ProtectedRoute>
+            <Assessments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/behaviour"
+        element={
+          <ProtectedRoute>
+            <Behaviour />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/alerts"
+        element={
+          <ProtectedRoute>
+            <Alerts />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ── Admin Module ────────────────────────────────────────── */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="schools" element={<Schools />} />
+        <Route path="programs" element={<Programs />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="comparisons" element={<Comparisons />} />
+        <Route path="teachers" element={<Teachers />} />
+        <Route path="reports" element={<Reports />} />
+      </Route>
+
+      {/* ── Student Module ──────────────────────────────────────── */}
+      <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
       <Route path="/student/dashboard" element={<StudentLayout><StudentDashboard /></StudentLayout>} />
       <Route path="/student/progress" element={<StudentLayout><MyProgress /></StudentLayout>} />
       <Route path="/student/leaderboard" element={<StudentLayout><Leaderboard /></StudentLayout>} />
-      
-      {/* Voice SEL Assessment Route */}
       <Route path="/student/sel-analysis" element={<StudentLayout><SELAnalysis /></StudentLayout>} />
       <Route path="/student/sel-assessment" element={<StudentLayout><SELAnalysis /></StudentLayout>} />
       <Route path="/student/communication" element={<StudentLayout><SELAnalysis /></StudentLayout>} />
-
-      {/* Auxiliary Pages */}
       <Route path="/student/achievements" element={<StudentLayout><Achievements /></StudentLayout>} />
       <Route path="/student/notifications" element={<StudentLayout><Notifications /></StudentLayout>} />
 
+      {/* Default & Catch-all */}
+      <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/student/dashboard" replace />} />
     </Routes>
   );
@@ -456,8 +533,5 @@ const styles = {
     color: '#94A3B8',
     marginTop: '4px',
     paddingLeft: '6px'
-  },
-  mobileBottomBar: {
-    display: 'none'
   }
 };

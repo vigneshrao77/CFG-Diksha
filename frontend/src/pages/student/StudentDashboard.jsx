@@ -29,15 +29,15 @@ export default function StudentDashboard() {
     );
   }
 
-  const { profile, academic, attendance, health, behaviour, selDevelopment, alerts } = data;
+  const { profile, academic, attendance, health, behaviour, selDevelopment, alerts } = data || {};
 
   const selDimensionsList = [
-    { label: 'Self-Awareness', key: 'selfAwareness', value: selDevelopment.dimensions?.selfAwareness || 80, color: '#1E3A5F' },
-    { label: 'Self-Management', key: 'selfManagement', value: selDevelopment.dimensions?.selfManagement || 70, color: '#3F8F5F' },
-    { label: 'Empathy / Social Awareness', key: 'empathy', value: selDevelopment.dimensions?.empathy || 85, color: '#F2A93B' },
-    { label: 'Communication', key: 'communication', value: selDevelopment.dimensions?.communication || 90, color: '#1E3A5F' },
-    { label: 'Teamwork / Relationship Skills', key: 'teamwork', value: selDevelopment.dimensions?.teamwork || 75, color: '#3F8F5F' },
-    { label: 'Responsible Decision-Making', key: 'responsibleDecisionMaking', value: selDevelopment.dimensions?.responsibleDecisionMaking || 80, color: '#1E3A5F' }
+    { label: 'Self-Awareness', key: 'selfAwareness', value: selDevelopment?.dimensions?.selfAwareness || 80, color: '#1E3A5F' },
+    { label: 'Self-Management', key: 'selfManagement', value: selDevelopment?.dimensions?.selfManagement || 70, color: '#3F8F5F' },
+    { label: 'Empathy / Social Awareness', key: 'empathy', value: selDevelopment?.dimensions?.empathy || 85, color: '#F2A93B' },
+    { label: 'Communication', key: 'communication', value: selDevelopment?.dimensions?.communication || 90, color: '#1E3A5F' },
+    { label: 'Teamwork / Relationship Skills', key: 'teamwork', value: selDevelopment?.dimensions?.teamwork || 75, color: '#3F8F5F' },
+    { label: 'Responsible Decision-Making', key: 'responsibleDecisionMaking', value: selDevelopment?.dimensions?.responsibleDecisionMaking || 80, color: '#1E3A5F' }
   ];
 
   return (
@@ -46,15 +46,15 @@ export default function StudentDashboard() {
       <div style={styles.heroBanner}>
         <div style={styles.heroContent}>
           <div style={styles.avatarCircle}>
-            {profile.name.charAt(0)}
+            {profile?.name ? profile.name.charAt(0) : 'S'}
           </div>
           <div>
             <div style={styles.welcomeTag}>
               <Sparkles size={13} color="#F2A93B" /> WELCOME BACK
             </div>
-            <h1 style={styles.heroTitle}>{profile.name}</h1>
+            <h1 style={styles.heroTitle}>{profile?.name || 'Student'}</h1>
             <p style={styles.heroSub}>
-              {profile.class} - Section {profile.section} | {profile.school} | Batch <span style={{ fontFamily: 'var(--font-mono)' }}>{profile.batch}</span>
+              {profile?.class || 'Class 10'} - Section {profile?.section || 'A'} | {profile?.school || 'Diksha Model High School'} | Batch <span style={{ fontFamily: 'var(--font-mono)' }}>{profile?.batch || '2025-2026'}</span>
             </p>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function StudentDashboard() {
       {/* Grid Layout */}
       <div style={styles.dashboardGrid}>
 
-        {/* 1. Academic Performance Card (Left Banyan Green status accent) */}
+        {/* 1. Academic Performance Card */}
         <div style={{ ...styles.card, borderLeft: '4px solid #3F8F5F' }}>
           <div style={styles.cardHeader}>
             <div style={{ ...styles.iconBox, backgroundColor: '#EDF7F1', color: '#3F8F5F' }}>
@@ -84,22 +84,21 @@ export default function StudentDashboard() {
           <div style={styles.metricRow}>
             <div>
               <div style={styles.bigMetric}>
-                {academic.currentMonthlyScore} <span style={styles.metricMax}>/ {academic.maxScore}</span>
+                {academic?.currentMonthlyScore || 18} <span style={styles.metricMax}>/ {academic?.maxScore || 20}</span>
               </div>
               <div style={styles.metricLabel}>Monthly Assignment Marks</div>
             </div>
-            {/* 📊 Banyan Green positive metric */}
             <div style={styles.badgeSuccess}>
-              <TrendingUp size={14} /> +{academic.previousMonthComparison}% vs last month
+              <TrendingUp size={14} /> +{academic?.previousMonthComparison || 5}% vs last month
             </div>
           </div>
 
           <div style={styles.progressTrack}>
-            <div style={{ ...styles.progressBar, width: `${academic.percentage}%`, backgroundColor: '#3F8F5F' }}></div>
+            <div style={{ ...styles.progressBar, width: `${academic?.percentage || 90}%`, backgroundColor: '#3F8F5F' }}></div>
           </div>
           <div style={styles.progressInfo}>
             <span>Performance Score</span>
-            <span style={{ fontWeight: 700, color: '#3F8F5F', fontFamily: 'var(--font-mono)' }}>{academic.percentage}%</span>
+            <span style={{ fontWeight: 700, color: '#3F8F5F', fontFamily: 'var(--font-mono)' }}>{academic?.percentage || 90}%</span>
           </div>
         </div>
 
@@ -118,18 +117,18 @@ export default function StudentDashboard() {
           <div style={styles.metricRow}>
             <div>
               <div style={styles.bigMetric}>
-                {attendance.percentage}%
+                {attendance?.percentage || 91.6}%
               </div>
               <div style={styles.metricLabel}>Overall Attendance</div>
             </div>
             <div style={styles.statPillContainer}>
-              <span style={styles.statPillGreen}><CheckCircle2 size={12} /> {attendance.presentDays} Present</span>
-              <span style={styles.statPillRed}>{attendance.absentDays} Absent</span>
+              <span style={styles.statPillGreen}><CheckCircle2 size={12} /> {attendance?.presentDays || 22} Present</span>
+              <span style={styles.statPillRed}>{attendance?.absentDays || 2} Absent</span>
             </div>
           </div>
 
           <div style={styles.progressTrack}>
-            <div style={{ ...styles.progressBar, width: `${attendance.percentage}%`, backgroundColor: '#1E3A5F' }}></div>
+            <div style={{ ...styles.progressBar, width: `${attendance?.percentage || 91.6}%`, backgroundColor: '#1E3A5F' }}></div>
           </div>
           <div style={styles.progressInfo}>
             <span>Status: Healthy Standing</span>
@@ -152,19 +151,19 @@ export default function StudentDashboard() {
           <div style={styles.healthGrid}>
             <div style={styles.healthItem}>
               <span style={styles.healthLabel}>Height</span>
-              <span style={styles.healthValue}>{health.height} <small style={{ fontFamily: 'var(--font-sans)', fontSize: '11px' }}>cm</small></span>
+              <span style={styles.healthValue}>{health?.height || 162} <small style={{ fontFamily: 'var(--font-sans)', fontSize: '11px' }}>cm</small></span>
             </div>
             <div style={styles.healthItem}>
               <span style={styles.healthLabel}>Weight</span>
-              <span style={styles.healthValue}>{health.weight} <small style={{ fontFamily: 'var(--font-sans)', fontSize: '11px' }}>kg</small></span>
+              <span style={styles.healthValue}>{health?.weight || 54} <small style={{ fontFamily: 'var(--font-sans)', fontSize: '11px' }}>kg</small></span>
             </div>
             <div style={styles.healthItem}>
               <span style={styles.healthLabel}>BMI Ratio</span>
-              <span style={styles.healthValue}>{health.bmi}</span>
+              <span style={styles.healthValue}>{health?.bmi || 20.6}</span>
             </div>
           </div>
           <div style={styles.healthFooter}>
-            <ShieldCheck size={14} color="#3F8F5F" /> Private to you only. Last checkup: <span style={{ fontFamily: 'var(--font-mono)' }}>{health.lastCheckupDate}</span>
+            <ShieldCheck size={14} color="#3F8F5F" /> Private to you only. Last checkup: <span style={{ fontFamily: 'var(--font-mono)' }}>{health?.lastCheckupDate || '2026-08-15'}</span>
           </div>
         </div>
 
@@ -182,15 +181,15 @@ export default function StudentDashboard() {
 
           <div style={styles.behaviourRow}>
             <div style={styles.behaviourBadge}>
-              <Flame size={15} color="#F2A93B" /> <span style={{ fontFamily: 'var(--font-mono)' }}>{behaviour.points}</span> Reward Points
+              <Flame size={15} color="#F2A93B" /> <span style={{ fontFamily: 'var(--font-mono)' }}>{behaviour?.points || 45}</span> Reward Points
             </div>
             <div style={styles.behaviourScore}>
-              Score: <strong style={{ fontFamily: 'var(--font-mono)' }}>{behaviour.disciplineScore}/100</strong>
+              Score: <strong style={{ fontFamily: 'var(--font-mono)' }}>{behaviour?.disciplineScore || 92}/100</strong>
             </div>
           </div>
 
           <div style={styles.feedbackBox}>
-            <p style={styles.feedbackText}>"{behaviour.teacherFeedback}"</p>
+            <p style={styles.feedbackText}>"{behaviour?.teacherFeedback || 'Demonstrates remarkable emotional maturity and steady focus.'}"</p>
             <span style={styles.feedbackAuthor}>— Class Teacher Feedback</span>
           </div>
         </div>
@@ -210,7 +209,7 @@ export default function StudentDashboard() {
             </div>
           </div>
           <div style={styles.selScoreBadge}>
-            Overall SEL: <strong style={{ fontFamily: 'var(--font-mono)' }}>{selDevelopment.percentage}%</strong> ({selDevelopment.currentScore}/{selDevelopment.maxScore})
+            Overall SEL: <strong style={{ fontFamily: 'var(--font-mono)' }}>{selDevelopment?.percentage || 80}%</strong> ({selDevelopment?.currentScore || 96}/{selDevelopment?.maxScore || 120})
           </div>
         </div>
 
@@ -346,7 +345,6 @@ const styles = {
     gap: '12px',
     flexWrap: 'wrap'
   },
-  /* 🔘 Marigold button */
   actionBtnMarigold: {
     backgroundColor: '#F2A93B',
     color: '#1E3A5F',
@@ -360,25 +358,11 @@ const styles = {
     gap: '8px',
     boxShadow: '0 4px 12px rgba(242, 169, 59, 0.3)'
   },
-  actionBtnSecondary: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: '#ffffff',
-    padding: '12px 20px',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    fontSize: '14px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.2)'
-  },
   dashboardGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '24px'
   },
-  /* 🃏 Card styling */
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: '12px',
