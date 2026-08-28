@@ -14,11 +14,13 @@ router.get('/progress', studentController.getProgress);
 router.get('/leaderboard', studentController.getLeaderboard);
 
 // 🎤 Groq + Whisper + Gemini AI Voice SEL Pipeline Endpoints
+router.get('/voice/status', studentController.getMonthlyAssessmentStatus);
 router.post('/voice/generate-questions', studentController.generate12VoiceQuestions);
 router.post('/voice/transcribe', studentController.transcribeGroqWhisper);
 router.post('/voice/analyze-question', studentController.analyzeVoiceResponse);
 router.post('/voice/submit-report', studentController.submitVoiceSELReport);
 router.get('/voice/history', studentController.getVoiceSELHistory);
+router.get('/voice/report/:month', studentController.getVoiceSELReportByMonth);
 
 // Legacy SEL & Speech backwards compatibility routes
 router.post('/sel/generate', studentController.generate12VoiceQuestions);

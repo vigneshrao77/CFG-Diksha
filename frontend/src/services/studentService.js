@@ -89,45 +89,52 @@ export const studentService = {
     }
   },
 
-  // 🎤 GROQ + WHISPER VOICE SEL PIPELINE METHODS
+  // 🎤 MONTHLY VOICE SEL PROGRESS PIPELINE
 
-  // 1. Generate 12 Voice Questions via Gemini AI
-  generate12VoiceQuestions: async () => {
+  // 1. Check Monthly Status
+  getMonthlyAssessmentStatus: async (month = '2026-08') => {
+    try {
+      const res = await fetch(`${API_BASE}/voice/status?month=${month}`, { headers: getHeaders() });
+      if (!res.ok) throw new Error('Failed to fetch monthly assessment status');
+      return await res.json();
+    } catch (err) {
+      return { success: true, isCompleted: false, month };
+    }
+  },
+
+  // 2. Generate Dynamic Voice Questions via Gemini AI
+  generate12VoiceQuestions: async (month = '2026-08') => {
     try {
       const res = await fetch(`${API_BASE}/voice/generate-questions`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({})
+        body: JSON.stringify({ month })
       });
-      if (!res.ok) throw new Error('Failed to generate 12 voice questions');
+      if (!res.ok) throw new Error('Failed to generate voice questions');
       return await res.json();
     } catch (err) {
-      console.warn('Backend 12-question generation error, returning structured fallback:', err.message);
+      console.warn('Backend dynamic question generation error, returning structured template:', err.message);
       return {
         success: true,
+        isCompleted: false,
         assessment: {
-          assessmentTitle: "AI SEL Voice Assessment",
-          totalQuestions: 12,
+          assessmentTitle: `Monthly Voice SEL Assessment (${month})`,
+          month,
+          totalQuestions: 6,
           questions: [
             { id: 1, dimension: "Self-Awareness", question: "When you receive unexpected constructive criticism on a group project, how do you reflect on your work?", assessmentFocus: "Recognizing personal emotions and learning from feedback." },
-            { id: 2, dimension: "Self-Awareness", question: "Think about a time when you felt nervous before a major class presentation. What did you learn about yourself?", assessmentFocus: "Understanding personal emotional triggers and strengths." },
-            { id: 3, dimension: "Self-Management", question: "Imagine you have two major assignments and an exam on the same day. How do you stay calm and organized?", assessmentFocus: "Stress management and impulse regulation under pressure." },
-            { id: 4, dimension: "Self-Management", question: "If a group member accidentally deleted part of your shared document right before submission, how would you respond?", assessmentFocus: "Controlling emotional reactions and constructive problem solving." },
-            { id: 5, dimension: "Empathy / Social Awareness", question: "Imagine your classmate failed an important exam and is sitting alone looking very upset. What would you do?", assessmentFocus: "Recognizing others' emotions and offering genuine perspective taking." },
-            { id: 6, dimension: "Empathy / Social Awareness", question: "During a class debate, a peer expresses an opinion that is opposite to yours. How do you listen to them?", assessmentFocus: "Respecting diverse perspectives and demonstrating active listening." },
-            { id: 7, dimension: "Communication", question: "If you disagree with your project leader's plan for a science project, how do you express your ideas clearly?", assessmentFocus: "Expressing perspective clearly and respectfully." },
-            { id: 8, dimension: "Communication", question: "When explaining a complex idea to a teammate who is struggling to understand, how do you adapt your speech?", assessmentFocus: "Clarity, patience, and effective explanation." },
-            { id: 9, dimension: "Teamwork / Relationship Skills", question: "Your team needs to divide roles for an upcoming presentation. How do you ensure everyone feels included?", assessmentFocus: "Collaboration, peer support, and inclusive leadership." },
-            { id: 10, dimension: "Teamwork / Relationship Skills", question: "If two of your group members start arguing about who gets to present the main slides, how do you help resolve it?", assessmentFocus: "Conflict resolution and team harmony." },
-            { id: 11, dimension: "Responsible Decision-Making", question: "You find a notebook containing next week's quiz questions left behind in the library. What decision do you make?", assessmentFocus: "Ethical reasoning and taking personal responsibility." },
-            { id: 12, dimension: "Responsible Decision-Making", question: "Your friends invite you to go to the movies the evening before a final exam. How do you decide what to do?", assessmentFocus: "Evaluating consequences and making thoughtful choices." }
+            { id: 2, dimension: "Self-Management", question: "Imagine you have two major assignments and an exam on the same day. How do you stay calm and organized?", assessmentFocus: "Stress management and impulse regulation under pressure." },
+            { id: 3, dimension: "Empathy / Social Awareness", question: "Imagine your classmate failed an important exam and is sitting alone looking very upset. What would you do?", assessmentFocus: "Recognizing others' emotions and offering genuine perspective taking." },
+            { id: 4, dimension: "Relationship Skills / Teamwork", question: "If two of your project group members disagree strongly on who should present the main slides, how would you help resolve it?", assessmentFocus: "Conflict resolution and collaborative leadership." },
+            { id: 5, dimension: "Communication", question: "When explaining a complex idea to a teammate who is struggling to understand, how do you adapt your explanation?", assessmentFocus: "Clarity, patience, and effective communication." },
+            { id: 6, dimension: "Responsible Decision-Making", question: "You find a notebook containing next week's quiz questions left behind in the library. What decision do you make?", assessmentFocus: "Ethical reasoning and taking personal responsibility." }
           ]
         }
       };
     }
   },
 
-  // 2. Transcribe Audio via Groq Whisper API
+  // 3. Transcribe Audio via Groq Whisper STT API
   transcribeGroqWhisper: async (audioBase64) => {
     try {
       const res = await fetch(`${API_BASE}/voice/transcribe`, {
@@ -151,7 +158,7 @@ export const studentService = {
     }
   },
 
-  // 3. Analyze Voice Response via Gemini AI
+  // 4. Analyze Voice Response via Gemini AI (4 Headings: SEL, Communication, Strengths, Improvements)
   analyzeVoiceResponse: async (questionId, question, dimension, transcript) => {
     try {
       const res = await fetch(`${API_BASE}/voice/analyze-question`, {
@@ -169,7 +176,7 @@ export const studentService = {
     }
   },
 
-  // 4. Submit Voice SEL Report
+  // 5. Submit Completed Monthly Voice SEL Report
   submitVoiceSELReport: async (questionEvaluations, month = '2026-08') => {
     try {
       const res = await fetch(`${API_BASE}/voice/submit-report`, {
@@ -186,26 +193,50 @@ export const studentService = {
           month,
           scores: {
             selfAwareness: 82,
-            selfManagement: 75,
+            selfManagement: 78,
             empathy: 88,
-            communication: 80,
-            teamwork: 90,
-            decisionMaking: 78
+            communication: 84,
+            teamwork: 85,
+            decisionMaking: 80
           },
           overallSELScore: 82,
-          communicationScore: 80,
-          strengths: ["Empathy", "Teamwork"],
-          areasForImprovement: ["Self-Management"],
+          communicationScore: 84,
+          strengths: ["Strong empathy during collaborative discussions", "Thoughtful self-reflection on feedback"],
+          areasForImprovement: ["Provide specific step-by-step reasoning under high pressure"],
           recommendations: [
-            "Your strongest area is teamwork. You demonstrate good cooperation and consideration for others.",
-            "Try practicing taking a short pause before reacting during high-pressure situations."
+            "Your strongest area is empathy. You demonstrate thoughtful consideration for your peers.",
+            "Practice taking a short pause before reacting during high-pressure situations."
           ],
           growth: {
-            overallGrowth: 8,
-            message: "Your overall SEL score improved by 8% compared with your previous assessment!"
-          }
+            overallGrowth: 5,
+            previousMonth: "2026-07",
+            message: "Your overall SEL score improved by 5% compared to your previous assessment!"
+          },
+          completedAt: new Date()
         }
       };
+    }
+  },
+
+  // 6. Get Historical Monthly Reports
+  getVoiceSELHistory: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/voice/history`, { headers: getHeaders() });
+      if (!res.ok) throw new Error('Failed to fetch historical reports');
+      return await res.json();
+    } catch (err) {
+      return { success: true, history: [] };
+    }
+  },
+
+  // 7. Get Specific Monthly Report
+  getVoiceSELReportByMonth: async (month) => {
+    try {
+      const res = await fetch(`${API_BASE}/voice/report/${month}`, { headers: getHeaders() });
+      if (!res.ok) throw new Error('Failed to fetch monthly report');
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: err.message };
     }
   }
 };

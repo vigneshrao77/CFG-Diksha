@@ -2,8 +2,10 @@ const mongoose = require('mongoose');
 
 const VoiceSELResultSchema = new mongoose.Schema({
   studentId: { type: String, required: true, index: true },
-  assessmentDate: { type: Date, default: Date.now },
+  assessmentType: { type: String, default: 'SEL' },
   month: { type: String, required: true }, // Format YYYY-MM e.g. "2026-08"
+  year: { type: Number, default: 2026 },
+  status: { type: String, default: 'COMPLETED' },
 
   scores: {
     selfAwareness: { type: Number, required: true }, // Percentage 0-100
@@ -28,6 +30,10 @@ const VoiceSELResultSchema = new mongoose.Schema({
     transcript: String,
     selScore: Number, // 1-10
     communicationScore: Number, // 1-10
+    selAnalysis: String,
+    communicationAnalysis: String,
+    strengths: [{ type: String }],
+    improvements: [{ type: String }],
     feedback: String,
     speechIndicators: {
       observation: String,
@@ -37,8 +43,14 @@ const VoiceSELResultSchema = new mongoose.Schema({
 
   growth: {
     overallGrowth: { type: Number, default: 0 },
-    message: { type: String, default: '' }
-  }
+    message: { type: String, default: '' },
+    previousMonth: { type: String, default: '' }
+  },
+
+  completedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
+
+// Enforce strictly ONE assessment per student + assessmentType + month
+VoiceSELResultSchema.index({ studentId: 1, assessmentType: 1, month: 1 }, { unique: true });
 
 module.exports = mongoose.model('VoiceSELResult', VoiceSELResultSchema);
