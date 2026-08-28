@@ -150,8 +150,8 @@ export default function TeacherStudents() {
                       </div>
                     </td>
                     <td data-label="Behaviour">
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>
-                        💬 {s.behaviour.communication}/10 · ⭐ {s.behaviour.behaviourPoints}/10
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }} title="Overall SEL Index">
+                        🌱 {s.behaviour.overallSelIndex || 8}/10
                       </span>
                     </td>
                     <td data-label="Health (BMI)">

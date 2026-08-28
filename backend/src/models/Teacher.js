@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
 
 const teacherSchema = new mongoose.Schema({
   teacherId:     { type: String, required: true, unique: true, index: true },
@@ -10,13 +10,18 @@ const teacherSchema = new mongoose.Schema({
   avatarColor:   { type: String, default: '#1E3A5F' },
   classes:       [{ type: String }],
   subject:       { type: String, default: 'General' },
-  role:          { type: String, default: 'teacher' },
-  centre:        { type: String, default: 'KHEL Centre - Danapur' },
+  // EXTENDED: role now includes 'volunteer' and 'admin'
+  role:          { type: String, enum: ['teacher', 'admin', 'volunteer'], default: 'teacher' },
+  centre:        { type: mongoose.Schema.Types.ObjectId, ref: 'School' },
+  centreName:    { type: String },          // denormalized label for quick display
   phone:         { type: String },
   qualification: { type: String, default: 'B.Ed, B.Sc' },
   rating:        { type: Number, default: 4.8 },
-  status:        { type: String, default: 'Active' },
+  status:        { type: String, enum: ['Active', 'On Leave', 'Inactive'], default: 'Active' },
   joinDate:      { type: String },
+  // NEW: Volunteer-only fields (null/undefined for teachers & admins)
+  availability:    { type: String },          // e.g. "Weekends", "Mon/Wed evenings"
+  hoursCommitted:  { type: Number },          // weekly hours committed
 }, { timestamps: true });
 
 // Pre-save hook to hash password if modified

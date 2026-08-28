@@ -1,15 +1,7 @@
 /**
  * teacherController.js
  * Express controller for all /api/teacher/* endpoints.
- *
- * Architecture:
- *  - Primary: reads/writes to MongoDB via Mongoose models
- *  - Fallback: if DB is not connected, returns structured mock data
- *    with the same JSON shape so the frontend service is interchangeable.
- *
- * All responses follow the pattern:
- *   Success: { data } or array
- *   Error:   { error: string, details?: any }
+ * Updated to support V3 Schema (ObjectId references, CASEL SEL dimensions)
  */
 
 const Student = require('../models/Student');
@@ -22,12 +14,18 @@ const mongoose = require('mongoose');
 
 const isConnected = () => mongoose.connection.readyState === 1;
 
+// Helper to get average SEL from a behaviour record
+const getOverallSel = (beh) => {
+  if (!beh) return 7.5;
+  if (beh.overallSelIndex) return beh.overallSelIndex;
+  // Fallback to legacy fields if CASEL fields are missing
+  return Math.round(((beh.communication || 7) + (beh.behaviourPoints || 8)) / 2 * 10) / 10;
+};
+
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 async function getDashboard(req, res) {
   try {
-    if (!isConnected()) {
-      return res.status(503).json({ error: 'Database not connected' });
-    }
+    if (!isConnected()) return res.status(503).json({ error: 'Database not connected' });
 
     const { class: cls } = req.query;
     const studentQuery = { status: 'active' };
@@ -39,11 +37,11 @@ async function getDashboard(req, res) {
     ]);
 
     const today = new Date().toISOString().split('T')[0];
-    const studentIds = students.map((s) => s.studentId);
+    const studentObjectIds = students.map((s) => s._id);
 
     const [todayAttendance, assessments] = await Promise.all([
-      Attendance.find({ date: today, studentId: { $in: studentIds } }).lean(),
-      Assessment.find({ period: 'Period 4', studentId: { $in: studentIds } }).lean(),
+      Attendance.find({ date: today, student: { $in: studentObjectIds } }).lean(),
+      Assessment.find({ period: 'Period 4', student: { $in: studentObjectIds } }).lean(),
     ]);
 
     const presentCount = todayAttendance.filter((a) => a.status === 'present').length;
@@ -116,23 +114,28 @@ async function getStudents(req, res) {
     const students = await Student.find(query).sort({ name: 1 }).lean();
     const today = new Date().toISOString().split('T')[0];
 
-    const studentIds = students.map((s) => s.studentId);
+    const studentObjectIds = students.map((s) => s._id);
+    
+    // Use populate or lean to join records by ObjectId
     const [allAttendance, allAssessments, allHealth, allBehaviour] = await Promise.all([
-      Attendance.find({ studentId: { $in: studentIds } }).lean(),
-      Assessment.find({ studentId: { $in: studentIds } }).lean(),
-      HealthRecord.find({ studentId: { $in: studentIds } }).sort({ date: 1 }).lean(),
-      BehaviourRecord.find({ studentId: { $in: studentIds } }).lean(),
+      Attendance.find({ student: { $in: studentObjectIds } }).lean(),
+      Assessment.find({ student: { $in: studentObjectIds } }).lean(),
+      HealthRecord.find({ student: { $in: studentObjectIds } }).sort({ date: 1 }).lean(),
+      BehaviourRecord.find({ student: { $in: studentObjectIds } }).lean(),
     ]);
 
     const result = students.map((s) => {
+      // Stringify _id for fast comparison
+      const sid = s._id.toString();
+      
       // Attendance
-      const studentAtt = allAttendance.filter((a) => a.studentId === s.studentId);
+      const studentAtt = allAttendance.filter((a) => a.student.toString() === sid);
       const todayAtt = studentAtt.find((a) => a.date === today);
       const presentDays = studentAtt.filter((a) => a.status === 'present').length;
       const attPct = studentAtt.length ? Math.round((presentDays / studentAtt.length) * 100) : 90;
 
       // Assessment
-      const studentAsmnts = allAssessments.filter((a) => a.studentId === s.studentId);
+      const studentAsmnts = allAssessments.filter((a) => a.student.toString() === sid);
       const currentAsmnt = studentAsmnts.find((a) => a.period === 'Period 4') || studentAsmnts[studentAsmnts.length - 1];
       const currentPerf = currentAsmnt ? currentAsmnt.percentage : 75;
       const prevAsmnt = studentAsmnts.find((a) => a.period !== 'Period 4');
@@ -142,15 +145,15 @@ async function getStudents(req, res) {
       const needsAttention = change <= -8 || attPct < 70;
 
       // Behaviour
-      const beh = allBehaviour.find((b) => b.studentId === s.studentId) || { communication: 8, behaviourPoints: 8 };
+      const beh = allBehaviour.find((b) => b.student.toString() === sid) || {};
 
       // Health
-      const healthList = allHealth.filter((h) => h.studentId === s.studentId);
+      const healthList = allHealth.filter((h) => h.student.toString() === sid);
       const latestHealth = healthList[healthList.length - 1] || { bmi: 20.5, bmiStatus: 'Reference range' };
 
       return {
-        id: s.studentId,
-        studentId: s.studentId,
+        id: s.studentId, // Keep string ID for frontend routing
+        studentId: s.studentId, 
         name: s.name,
         class: s.class,
         group: s.group || 'Morning',
@@ -167,8 +170,13 @@ async function getStudents(req, res) {
           change,
         },
         behaviour: {
-          communication: beh.communication,
-          behaviourPoints: beh.behaviourPoints,
+          // Send CASEL dimensions
+          selfAwareness: beh.selfAwareness || 8,
+          selfManagement: beh.selfManagement || 8,
+          socialAwareness: beh.socialAwareness || 8,
+          relationshipSkills: beh.relationshipSkills || beh.communication || 8,
+          responsibleDecisionMaking: beh.responsibleDecisionMaking || beh.behaviourPoints || 8,
+          overallSelIndex: getOverallSel(beh)
         },
         health: {
           bmi: latestHealth.bmi,
@@ -179,7 +187,6 @@ async function getStudents(req, res) {
       };
     });
 
-    // Apply optional filter parameters
     let filtered = result;
     if (performance === 'high') filtered = filtered.filter((s) => s.performance.current >= 80);
     if (performance === 'medium') filtered = filtered.filter((s) => s.performance.current >= 60 && s.performance.current < 80);
@@ -201,10 +208,10 @@ async function getStudentById(req, res) {
     if (!s) return res.status(404).json({ error: 'Student not found' });
 
     const [attendanceList, assessmentList, healthList, behaviourDoc] = await Promise.all([
-      Attendance.find({ studentId: s.studentId }).sort({ date: 1 }).lean(),
-      Assessment.find({ studentId: s.studentId }).lean(),
-      HealthRecord.find({ studentId: s.studentId }).sort({ date: 1 }).lean(),
-      BehaviourRecord.findOne({ studentId: s.studentId }).lean(),
+      Attendance.find({ student: s._id }).sort({ date: 1 }).lean(),
+      Assessment.find({ student: s._id }).lean(),
+      HealthRecord.find({ student: s._id }).sort({ date: 1 }).lean(),
+      BehaviourRecord.findOne({ student: s._id }).lean(),
     ]);
 
     const presentDays = attendanceList.filter((a) => a.status === 'present').length;
@@ -218,6 +225,14 @@ async function getStudentById(req, res) {
     const prevPerf = prevAsmnt ? prevAsmnt.percentage : currentPerf;
     const change = prevPerf ? Math.round(((currentPerf - prevPerf) / prevPerf) * 100 * 10) / 10 : 0;
     const trend = change <= -8 ? 'declining' : change >= 8 ? 'improving' : 'stable';
+    
+    // Add virtual age fallback 
+    let age = null;
+    if (s.dateOfBirth) {
+      const dob = new Date(s.dateOfBirth);
+      const now = new Date();
+      age = now.getFullYear() - dob.getFullYear();
+    }
 
     const fullStudent = {
       id: s.studentId,
@@ -233,6 +248,9 @@ async function getStudentById(req, res) {
       parentPhone: s.parentPhone || '9876543211',
       address: s.address || 'Bangalore, Karnataka',
       joinDate: s.joinDate || '2024-01-15',
+      dateOfBirth: s.dateOfBirth,
+      gender: s.gender,
+      age: age,
       status: s.status,
       attendance: {
         percentage: attPct,
@@ -251,9 +269,20 @@ async function getStudentById(req, res) {
         previousTotal: prevAsmnt ? prevAsmnt.total : 30,
         previousPercentage: prevPerf,
       },
-      behaviour: behaviourDoc || {
-        communication: 8,
-        behaviourPoints: 8,
+      behaviour: behaviourDoc ? {
+        selfAwareness: behaviourDoc.selfAwareness || 8,
+        selfManagement: behaviourDoc.selfManagement || 8,
+        socialAwareness: behaviourDoc.socialAwareness || 8,
+        relationshipSkills: behaviourDoc.relationshipSkills || behaviourDoc.communication || 8,
+        responsibleDecisionMaking: behaviourDoc.responsibleDecisionMaking || behaviourDoc.behaviourPoints || 8,
+        overallSelIndex: getOverallSel(behaviourDoc),
+        recentObservation: behaviourDoc.recentObservation || 'Active and engaged student in class.',
+        trend: behaviourDoc.trend || 'stable',
+        aiInsight: behaviourDoc.aiInsight || `${s.name} displays positive attitude and consistent participation.`,
+        lastUpdated: behaviourDoc.date || behaviourDoc.updatedAt || today,
+        history: [], // Would normally come from Analytics
+      } : {
+        selfAwareness: 8, selfManagement: 8, socialAwareness: 8, relationshipSkills: 8, responsibleDecisionMaking: 8, overallSelIndex: 8,
         recentObservation: 'Active and engaged student in class.',
         trend: 'stable',
         aiInsight: `${s.name} displays positive attitude and consistent participation.`,
@@ -291,21 +320,22 @@ async function getAttendance(req, res) {
     if (cls && cls !== 'all') query.class = cls;
 
     const students = await Student.find(query).sort({ name: 1 }).lean();
-    const studentIds = students.map((s) => s.studentId);
+    const studentObjectIds = students.map((s) => s._id);
 
     const [todayRecords, allAttendance] = await Promise.all([
-      Attendance.find({ date, studentId: { $in: studentIds } }).lean(),
-      Attendance.find({ studentId: { $in: studentIds } }).lean(),
+      Attendance.find({ date, student: { $in: studentObjectIds } }).lean(),
+      Attendance.find({ student: { $in: studentObjectIds } }).lean(),
     ]);
 
     const result = students.map((s) => {
-      const todayEntry = todayRecords.find((r) => r.studentId === s.studentId);
-      const studentHistory = allAttendance.filter((r) => r.studentId === s.studentId);
+      const sid = s._id.toString();
+      const todayEntry = todayRecords.find((r) => r.student.toString() === sid);
+      const studentHistory = allAttendance.filter((r) => r.student.toString() === sid);
       const presentDays = studentHistory.filter((r) => r.status === 'present').length;
       const attPct = studentHistory.length ? Math.round((presentDays / studentHistory.length) * 100) : 90;
 
       return {
-        studentId: s.studentId,
+        studentId: s.studentId, // keep for frontend routing
         studentName: s.name,
         initial: s.initial || s.name.slice(0, 2).toUpperCase(),
         avatarColor: s.avatarColor || '#1E3A5F',
@@ -327,15 +357,26 @@ async function saveAttendance(req, res) {
     const { date, classId, records } = req.body;
     if (!date || !records?.length) return res.status(400).json({ error: 'date and records are required' });
 
-    const ops = records.map(({ studentId, status }) => ({
-      updateOne: {
-        filter: { studentId, date },
-        update: { $set: { studentId, date, status, class: classId, teacherId: 'T001' } },
-        upsert: true,
-      },
-    }));
+    // Look up ObjectId for all students 
+    const studentIds = records.map(r => r.studentId);
+    const students = await Student.find({ studentId: { $in: studentIds } }, { _id: 1, studentId: 1 }).lean();
+    const idMap = new Map();
+    students.forEach(s => idMap.set(s.studentId, s._id));
+
+    const ops = records.map(({ studentId, status }) => {
+      const s_id = idMap.get(studentId);
+      if (!s_id) return null; // skip unknown
+      return {
+        updateOne: {
+          filter: { student: s_id, date },
+          update: { $set: { student: s_id, studentId, date, status, class: classId, academicYear: '2026-27' } },
+          upsert: true,
+        },
+      };
+    }).filter(Boolean);
+
     await Attendance.bulkWrite(ops);
-    res.json({ success: true, message: `Attendance saved for ${records.length} students` });
+    res.json({ success: true, message: `Attendance saved for ${ops.length} students` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -348,7 +389,7 @@ async function getHealthRecord(req, res) {
     const student = await Student.findOne({ studentId: req.params.id }).lean();
     if (!student) return res.status(404).json({ error: 'Student not found' });
 
-    const records = await HealthRecord.find({ studentId: req.params.id }).sort({ date: 1 }).lean();
+    const records = await HealthRecord.find({ student: student._id }).sort({ date: 1 }).lean();
     res.json({
       studentId: req.params.id,
       studentName: student.name,
@@ -368,6 +409,9 @@ async function saveHealthRecord(req, res) {
     const { studentId, height, weight } = req.body;
     if (!studentId || !height || !weight) return res.status(400).json({ error: 'studentId, height, weight required' });
 
+    const student = await Student.findOne({ studentId }).lean();
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
     const bmi = weight / ((height / 100) ** 2);
     const bmiRounded = Math.round(bmi * 10) / 10;
     let bmiStatus;
@@ -376,7 +420,8 @@ async function saveHealthRecord(req, res) {
     else bmiStatus = 'Above reference range';
 
     const record = await HealthRecord.create({
-      studentId,
+      student: student._id,
+      studentId, // legacy
       date: new Date().toISOString().split('T')[0],
       height: Math.round(height * 10) / 10,
       weight: Math.round(weight * 10) / 10,
@@ -399,15 +444,16 @@ async function getAssessments(req, res) {
     if (search) query.name = { $regex: search, $options: 'i' };
 
     const students = await Student.find(query).sort({ name: 1 }).lean();
-    const studentIds = students.map((s) => s.studentId);
+    const studentObjectIds = students.map((s) => s._id);
 
     const [currentAsmnts, allAsmnts] = await Promise.all([
-      Assessment.find({ period, studentId: { $in: studentIds } }).lean(),
-      Assessment.find({ studentId: { $in: studentIds } }).lean(),
+      Assessment.find({ period, student: { $in: studentObjectIds } }).lean(),
+      Assessment.find({ student: { $in: studentObjectIds } }).lean(),
     ]);
 
     const result = students.map((s) => {
-      const current = currentAsmnts.find((a) => a.studentId === s.studentId) || {
+      const sid = s._id.toString();
+      const current = currentAsmnts.find((a) => a.student.toString() === sid && a.evaluatorType === 'teacher') || {
         period,
         assignment: 14,
         test: 4,
@@ -418,7 +464,7 @@ async function getAssessments(req, res) {
         percentage: 75,
       };
 
-      const previous = allAsmnts.find((a) => a.studentId === s.studentId && a.period !== period) || null;
+      const previous = allAsmnts.find((a) => a.student.toString() === sid && a.period !== period && a.evaluatorType === 'teacher') || null;
       const prevPct = previous ? previous.percentage : current.percentage;
       const change = prevPct ? Math.round(((current.percentage - prevPct) / prevPct) * 100 * 10) / 10 : 0;
       const trend = change <= -8 ? 'declining' : change >= 8 ? 'improving' : 'stable';
@@ -445,14 +491,28 @@ async function getAssessments(req, res) {
 async function saveAssessment(req, res) {
   try {
     if (!isConnected()) return res.status(503).json({ error: 'Database not connected' });
-    const { studentId, period, scores } = req.body;
+    // Extend to support new v3 fields
+    const { studentId, period, scores, evaluatorType = 'teacher', assessmentType = 'written_test', subject = 'General' } = req.body;
     if (!studentId || !period || !scores) return res.status(400).json({ error: 'studentId, period, scores required' });
+
+    const student = await Student.findOne({ studentId }).lean();
+    if (!student) return res.status(404).json({ error: 'Student not found' });
 
     const total = (Number(scores.assignment) || 0) + (Number(scores.test) || 0) + (Number(scores.discipline) || 0) + (Number(scores.notes) || 0) + (Number(scores.ela) || 0);
     const percentage = Math.round((total / 40) * 100);
     const record = await Assessment.findOneAndUpdate(
-      { studentId, period },
-      { $set: { ...scores, total, percentage, teacherId: 'T001' } },
+      { student: student._id, period, evaluatorType },
+      { 
+        $set: { 
+          ...scores, 
+          total, 
+          percentage, 
+          studentId, 
+          academicYear: '2026-27',
+          assessmentType,
+          subject
+        } 
+      },
       { upsert: true, new: true }
     );
     res.json({ success: true, record });
@@ -461,7 +521,7 @@ async function saveAssessment(req, res) {
   }
 }
 
-// ─── Behaviour ───────────────────────────────────────────────────────────────
+// ─── Behaviour (SEL) ────────────────────────────────────────────────────────
 async function getBehaviourList(req, res) {
   try {
     if (!isConnected()) return res.status(503).json({ error: 'Database not connected' });
@@ -470,18 +530,12 @@ async function getBehaviourList(req, res) {
     if (cls && cls !== 'all') query.class = cls;
 
     const students = await Student.find(query).sort({ name: 1 }).lean();
-    const studentIds = students.map((s) => s.studentId);
-    const records = await BehaviourRecord.find({ studentId: { $in: studentIds } }).lean();
+    const studentObjectIds = students.map((s) => s._id);
+    // Find latest behaviour record by ID
+    const records = await BehaviourRecord.find({ student: { $in: studentObjectIds } }).lean();
 
     const result = students.map((s) => {
-      const beh = records.find((b) => b.studentId === s.studentId) || {
-        communication: 8,
-        behaviourPoints: 8,
-        recentObservation: 'Active and positive participation in class.',
-        aiInsight: `${s.name} engages well with peers and completes assignments on time.`,
-        trend: 'stable',
-        lastUpdated: new Date().toISOString().split('T')[0],
-      };
+      const beh = records.find((b) => b.student.toString() === s._id.toString()) || {};
 
       return {
         studentId: s.studentId,
@@ -489,22 +543,18 @@ async function getBehaviourList(req, res) {
         initial: s.initial || s.name.slice(0, 2).toUpperCase(),
         avatarColor: s.avatarColor || '#1E3A5F',
         class: s.class,
-        communication: beh.communication,
-        behaviourPoints: beh.behaviourPoints,
-        recentObservation: beh.recentObservation,
-        aiInsight: beh.aiInsight,
+        // CASEL dimensions
+        selfAwareness: beh.selfAwareness || 8,
+        selfManagement: beh.selfManagement || 8,
+        socialAwareness: beh.socialAwareness || 8,
+        relationshipSkills: beh.relationshipSkills || beh.communication || 8,
+        responsibleDecisionMaking: beh.responsibleDecisionMaking || beh.behaviourPoints || 8,
+        overallSelIndex: getOverallSel(beh),
+        
+        recentObservation: beh.recentObservation || 'Active and positive participation in class.',
+        aiInsight: beh.aiInsight || `${s.name} engages well with peers and completes assignments on time.`,
         trend: beh.trend || 'stable',
-        lastUpdated: beh.lastUpdated || new Date().toISOString().split('T')[0],
-        history: [
-          { week: 'Wk 1', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 2', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 3', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 4', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 5', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 6', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 7', communication: beh.communication, behaviour: beh.behaviourPoints },
-          { week: 'Wk 8', communication: beh.communication, behaviour: beh.behaviourPoints },
-        ],
+        lastUpdated: beh.date || beh.updatedAt || new Date().toISOString().split('T')[0],
       };
     });
 
@@ -520,15 +570,8 @@ async function getBehaviourInsights(req, res) {
     const s = await Student.findOne({ studentId: req.params.id }).lean();
     if (!s) return res.status(404).json({ error: 'Student not found' });
 
-    const record = await BehaviourRecord.findOne({ studentId: req.params.id }).lean();
-    const beh = record || {
-      communication: 8,
-      behaviourPoints: 8,
-      recentObservation: 'Active and positive participation in class.',
-      aiInsight: `${s.name} engages well with peers and completes assignments on time.`,
-      trend: 'stable',
-      lastUpdated: new Date().toISOString().split('T')[0],
-    };
+    const record = await BehaviourRecord.findOne({ student: s._id }).lean();
+    const beh = record || {};
 
     res.json({
       studentId: s.studentId,
@@ -536,22 +579,16 @@ async function getBehaviourInsights(req, res) {
       initial: s.initial || s.name.slice(0, 2).toUpperCase(),
       avatarColor: s.avatarColor || '#1E3A5F',
       class: s.class,
-      communication: beh.communication,
-      behaviourPoints: beh.behaviourPoints,
-      recentObservation: beh.recentObservation,
-      aiInsight: beh.aiInsight,
+      selfAwareness: beh.selfAwareness || 8,
+      selfManagement: beh.selfManagement || 8,
+      socialAwareness: beh.socialAwareness || 8,
+      relationshipSkills: beh.relationshipSkills || beh.communication || 8,
+      responsibleDecisionMaking: beh.responsibleDecisionMaking || beh.behaviourPoints || 8,
+      overallSelIndex: getOverallSel(beh),
+      recentObservation: beh.recentObservation || 'Active and positive participation in class.',
+      aiInsight: beh.aiInsight || `${s.name} engages well with peers and completes assignments on time.`,
       trend: beh.trend || 'stable',
-      lastUpdated: beh.lastUpdated || new Date().toISOString().split('T')[0],
-      history: [
-        { week: 'Wk 1', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 2', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 3', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 4', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 5', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 6', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 7', communication: beh.communication, behaviour: beh.behaviourPoints },
-        { week: 'Wk 8', communication: beh.communication, behaviour: beh.behaviourPoints },
-      ],
+      lastUpdated: beh.date || beh.updatedAt || new Date().toISOString().split('T')[0],
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -561,21 +598,33 @@ async function getBehaviourInsights(req, res) {
 async function saveBehaviourRecord(req, res) {
   try {
     if (!isConnected()) return res.status(503).json({ error: 'Database not connected' });
-    const { studentId, communication, behaviourPoints, observation } = req.body;
+    // Accepting all 5 CASEL dimensions from frontend
+    const { 
+      studentId, 
+      selfAwareness, selfManagement, socialAwareness, relationshipSkills, responsibleDecisionMaking, 
+      observation 
+    } = req.body;
+    
     if (!studentId) return res.status(400).json({ error: 'studentId required' });
 
     const student = await Student.findOne({ studentId }).lean();
-    const studentName = student?.name || 'Student';
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    const studentName = student.name;
 
     const record = await BehaviourRecord.findOneAndUpdate(
-      { studentId },
+      { student: student._id },
       {
         $set: {
-          communication: Number(communication) || 5,
-          behaviourPoints: Number(behaviourPoints) || 5,
+          studentId, // legacy
+          selfAwareness: Number(selfAwareness) || 8,
+          selfManagement: Number(selfManagement) || 8,
+          socialAwareness: Number(socialAwareness) || 8,
+          relationshipSkills: Number(relationshipSkills) || 8,
+          responsibleDecisionMaking: Number(responsibleDecisionMaking) || 8,
           recentObservation: observation || '',
-          aiInsight: `${studentName} showed updated progress in communication and behavior scores.`,
-          recordedBy: 'T001',
+          aiInsight: `${studentName} showed updated progress across CASEL SEL dimensions.`,
+          date: new Date().toISOString().split('T')[0],
+          academicYear: '2026-27'
         },
       },
       { upsert: true, new: true }
@@ -590,7 +639,8 @@ async function saveBehaviourRecord(req, res) {
 async function getAlerts(req, res) {
   try {
     if (!isConnected()) return res.status(503).json({ error: 'Database not connected' });
-    const alerts = await Alert.find({ teacherId: 'T001' }).sort({ createdAt: -1 }).lean();
+    // Can optionally populate student here if needed
+    const alerts = await Alert.find({ teacherId: 'T001' }).sort({ createdAt: -1 }).populate('student', 'name initial avatarColor').lean();
     res.json(alerts);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -604,11 +654,12 @@ async function sendAlert(req, res) {
     if (!studentId || !title || !message) return res.status(400).json({ error: 'studentId, title, message required' });
 
     const student = await Student.findOne({ studentId }).lean();
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
     const alert = await Alert.create({
-      alertId: `A${Date.now()}`,
-      studentId,
-      studentName: student?.name || 'Unknown',
-      teacherId: 'T001',
+      student: student._id,
+      studentId, // legacy
+      studentName: student.name,
       type: type || 'general',
       title,
       message,

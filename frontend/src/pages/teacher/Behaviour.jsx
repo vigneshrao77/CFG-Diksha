@@ -3,9 +3,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import TeacherLayout from '../../components/teacher/TeacherLayout';
 import StudentAvatar from '../../components/teacher/StudentAvatar';
 import StatusBadge from '../../components/teacher/StatusBadge';
-import TrendIndicator from '../../components/teacher/TrendIndicator';
 import LoadingState from '../../components/teacher/LoadingState';
-import { getBehaviourList, getBehaviourInsights, saveBehaviourRecord } from '../../services/teacherService';
+import { getBehaviourList, saveBehaviourRecord } from '../../services/teacherService';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -29,7 +28,16 @@ export default function Behaviour() {
   const [loading, setLoading] = useState(true);
   const [classFilter, setClassFilter] = useState('all');
   const [editMode, setEditMode] = useState(false);
-  const [editForm, setEditForm] = useState({ communication: '', behaviourPoints: '', observation: '' });
+  
+  // CASEL Dimensions
+  const [editForm, setEditForm] = useState({ 
+    selfAwareness: '', 
+    selfManagement: '', 
+    socialAwareness: '',
+    relationshipSkills: '',
+    responsibleDecisionMaking: '',
+    observation: '' 
+  });
   const [saving, setSaving] = useState(false);
   const { showToast } = useNotification();
 
@@ -37,7 +45,6 @@ export default function Behaviour() {
     getBehaviourList({ class: classFilter }).then((data) => {
       setStudents(data);
       if (data.length > 0) {
-        // Keep current selected if still present, else pick first
         const exists = data.find((s) => s.studentId === selected?.studentId);
         setSelected(exists || data[0]);
       } else {
@@ -47,7 +54,6 @@ export default function Behaviour() {
     });
   }, [classFilter]);
 
-  // Real-time search filter on current student list
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       const q = searchQuery.toLowerCase().trim();
@@ -66,8 +72,11 @@ export default function Behaviour() {
   const handleEdit = () => {
     if (!selected) return;
     setEditForm({
-      communication: selected.communication,
-      behaviourPoints: selected.behaviourPoints,
+      selfAwareness: selected.selfAwareness,
+      selfManagement: selected.selfManagement,
+      socialAwareness: selected.socialAwareness,
+      relationshipSkills: selected.relationshipSkills,
+      responsibleDecisionMaking: selected.responsibleDecisionMaking,
       observation: selected.recentObservation || '',
     });
     setEditMode(true);
@@ -79,12 +88,14 @@ export default function Behaviour() {
     try {
       await saveBehaviourRecord({
         studentId: selected.studentId,
-        communication: Number(editForm.communication),
-        behaviourPoints: Number(editForm.behaviourPoints),
+        selfAwareness: Number(editForm.selfAwareness),
+        selfManagement: Number(editForm.selfManagement),
+        socialAwareness: Number(editForm.socialAwareness),
+        relationshipSkills: Number(editForm.relationshipSkills),
+        responsibleDecisionMaking: Number(editForm.responsibleDecisionMaking),
         observation: editForm.observation,
       });
       showToast('success', `Behaviour record updated for ${selected.studentName}`, 'Saved');
-      // Refresh
       const updated = await getBehaviourList({ class: classFilter });
       setStudents(updated);
       const updatedSelected = updated.find((s) => s.studentId === selected.studentId);
@@ -101,7 +112,7 @@ export default function Behaviour() {
     <div style={{ padding: 'var(--sp-4)', background: `${color}10`, border: `1px solid ${color}30`, borderRadius: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-3)' }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--slate-600)' }}>{label}</span>
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', fontWeight: 700, color }}>{value}/10</span>
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 700, color }}>{value}/10</span>
       </div>
       <div className="progress-bar">
         <div className="progress-fill" style={{ width: `${(value / 10) * 100}%`, background: color }} />
@@ -113,15 +124,14 @@ export default function Behaviour() {
     <TeacherLayout>
       <div className="page-container">
         <div className="page-header">
-          <h1 className="page-title">Behaviour & AI Insights</h1>
-          <p className="page-subtitle">Communication and behaviour observations with search, class filters, and AI summaries</p>
+          <h1 className="page-title">Behaviour & AI Insights (CASEL SEL)</h1>
+          <p className="page-subtitle">Evaluate social-emotional development across 5 CASEL competencies</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 'var(--sp-6)' }} className="behaviour-grid">
-          {/* ── Left: Search & Filter Student List ─────────────────────── */}
+          {/* ── Left: Search & Filter ─────────────────────── */}
           <div>
             <div className="card" style={{ padding: 'var(--sp-4)', marginBottom: 'var(--sp-3)' }}>
-              {/* Search input */}
               <div className="form-group" style={{ marginBottom: 'var(--sp-3)' }}>
                 <label htmlFor="beh-search" className="form-label">🔍 Search Student</label>
                 <input
@@ -134,7 +144,6 @@ export default function Behaviour() {
                 />
               </div>
 
-              {/* Class dropdown */}
               <div className="form-group">
                 <label htmlFor="beh-class" className="form-label">🏫 Filter by Class</label>
                 <select
@@ -164,7 +173,6 @@ export default function Behaviour() {
                 <div style={{ padding: 'var(--sp-6)', textAlign: 'center', color: 'var(--slate-400)' }}>
                   <div style={{ fontSize: 24, marginBottom: 6 }}>🔍</div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>No students found</div>
-                  <div style={{ fontSize: 11, marginTop: 2 }}>Try clearing search or class filter</div>
                 </div>
               ) : (
                 <div style={{ maxHeight: 520, overflowY: 'auto' }}>
@@ -196,9 +204,7 @@ export default function Behaviour() {
                           <div style={{ display: 'flex', gap: 6, fontSize: 11, color: 'var(--slate-400)', marginTop: 2 }}>
                             <span>{s.class}</span>
                             <span>·</span>
-                            <span>💬 {s.communication}/10</span>
-                            <span>·</span>
-                            <span>⭐ {s.behaviourPoints}/10</span>
+                            <span title="Overall SEL Index">🌱 {s.overallSelIndex}/10</span>
                           </div>
                         </div>
                         <StatusBadge variant={s.trend} showDot={false} />
@@ -231,7 +237,7 @@ export default function Behaviour() {
                     </div>
                     {!editMode ? (
                       <button className="btn btn-secondary btn-sm" onClick={handleEdit}>
-                        ✏️ Edit Observation
+                        ✏️ Evaluate SEL
                       </button>
                     ) : (
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -239,7 +245,7 @@ export default function Behaviour() {
                           Cancel
                         </button>
                         <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
-                          {saving ? 'Saving…' : 'Save'}
+                          {saving ? 'Saving…' : 'Save Evaluation'}
                         </button>
                       </div>
                     )}
@@ -248,28 +254,15 @@ export default function Behaviour() {
 
                 {!editMode ? (
                   <>
-                    {/* Points */}
+                    {/* Points Grid (CASEL) */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)', marginBottom: 'var(--sp-4)' }}>
-                      <PointsDisplay label="Communication" value={selected.communication} color="var(--ink-indigo)" />
-                      <PointsDisplay label="Behaviour" value={selected.behaviourPoints} color="var(--banyan-green)" />
+                      <PointsDisplay label="Self-Awareness" value={selected.selfAwareness} color="var(--ink-indigo)" />
+                      <PointsDisplay label="Self-Management" value={selected.selfManagement} color="var(--coral-rose)" />
+                      <PointsDisplay label="Social Awareness" value={selected.socialAwareness} color="var(--sunflower)" />
+                      <PointsDisplay label="Relationship Skills" value={selected.relationshipSkills} color="var(--banyan-green)" />
+                      <PointsDisplay label="Decision-Making" value={selected.responsibleDecisionMaking} color="var(--slate-600)" />
+                      <PointsDisplay label="Overall SEL Index" value={selected.overallSelIndex} color="var(--ink-indigo)" />
                     </div>
-
-                    {/* Trend Chart */}
-                    {selected.history?.length > 0 && (
-                      <div className="card" style={{ padding: 'var(--sp-4)', marginBottom: 'var(--sp-4)' }}>
-                        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 'var(--sp-3)' }}>8-Week Communication & Behaviour Trend</div>
-                        <ResponsiveContainer width="100%" height={150}>
-                          <LineChart data={selected.history}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--slate-100)" />
-                            <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--slate-400)' }} />
-                            <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: 'var(--slate-400)' }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Line type="monotone" dataKey="communication" name="Communication" stroke="var(--ink-indigo)" strokeWidth={2.5} dot={{ r: 3 }} />
-                            <Line type="monotone" dataKey="behaviour" name="Behaviour" stroke="var(--banyan-green)" strokeWidth={2.5} dot={{ r: 3 }} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )}
 
                     {/* Observation */}
                     <div className="card" style={{ padding: 'var(--sp-4)', marginBottom: 'var(--sp-4)' }}>
@@ -297,71 +290,55 @@ export default function Behaviour() {
                         </span>
                       </div>
                       <p style={{ fontSize: 13.5, color: 'var(--slate-700)', lineHeight: 1.75, margin: 0 }}>
-                        {selected.aiInsight || `${selected.studentName} is maintaining steady participation in classroom activities.`}
-                      </p>
-                      <p style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 8, borderTop: '1px solid var(--slate-200)', paddingTop: 8 }}>
-                        Generated from observation records to support teacher decision-making.
+                        {selected.aiInsight}
                       </p>
                     </div>
                   </>
                 ) : (
                   /* Edit Form */
                   <div className="card" style={{ padding: 'var(--sp-5)' }}>
-                    <div className="section-heading">Update Behaviour Record for {selected.studentName}</div>
+                    <div className="section-heading">Evaluate CASEL Dimensions</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)' }}>
                         <div className="form-group">
-                          <label htmlFor="edit-comm" className="form-label">Communication (1–10)</label>
-                          <input
-                            id="edit-comm"
-                            type="number"
-                            className="form-input"
-                            min={1}
-                            max={10}
-                            value={editForm.communication}
-                            onChange={(e) => setEditForm((f) => ({ ...f, communication: e.target.value }))}
-                          />
+                          <label className="form-label">Self-Awareness (1–10)</label>
+                          <input type="number" className="form-input" min={1} max={10} value={editForm.selfAwareness} onChange={(e) => setEditForm({ ...editForm, selfAwareness: e.target.value })} />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="edit-beh" className="form-label">Behaviour Points (1–10)</label>
-                          <input
-                            id="edit-beh"
-                            type="number"
-                            className="form-input"
-                            min={1}
-                            max={10}
-                            value={editForm.behaviourPoints}
-                            onChange={(e) => setEditForm((f) => ({ ...f, behaviourPoints: e.target.value }))}
-                          />
+                          <label className="form-label">Self-Management (1–10)</label>
+                          <input type="number" className="form-input" min={1} max={10} value={editForm.selfManagement} onChange={(e) => setEditForm({ ...editForm, selfManagement: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Social Awareness (1–10)</label>
+                          <input type="number" className="form-input" min={1} max={10} value={editForm.socialAwareness} onChange={(e) => setEditForm({ ...editForm, socialAwareness: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Relationship Skills (1–10)</label>
+                          <input type="number" className="form-input" min={1} max={10} value={editForm.relationshipSkills} onChange={(e) => setEditForm({ ...editForm, relationshipSkills: e.target.value })} />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Responsible Decision-Making (1–10)</label>
+                          <input type="number" className="form-input" min={1} max={10} value={editForm.responsibleDecisionMaking} onChange={(e) => setEditForm({ ...editForm, responsibleDecisionMaking: e.target.value })} />
                         </div>
                       </div>
                       <div className="form-group">
-                        <label htmlFor="edit-obs" className="form-label">Observation Note</label>
+                        <label className="form-label">Observation Note</label>
                         <textarea
-                          id="edit-obs"
                           className="form-textarea"
                           rows={4}
-                          style={{ resize: 'vertical' }}
                           value={editForm.observation}
-                          onChange={(e) => setEditForm((f) => ({ ...f, observation: e.target.value }))}
-                          placeholder="Describe recent behaviour observations and notes…"
+                          onChange={(e) => setEditForm({ ...editForm, observation: e.target.value })}
+                          placeholder="Describe recent behaviour observations..."
                         />
                       </div>
                     </div>
                   </div>
                 )}
               </>
-            ) : (
-              <div className="card" style={{ padding: 'var(--sp-12)', textAlign: 'center', color: 'var(--slate-400)' }}>
-                <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
-                <div style={{ fontSize: 15, fontWeight: 600 }}>Select a student</div>
-                <div style={{ fontSize: 13, marginTop: 4 }}>Use the search box or class filter on the left to pick a student.</div>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
-      <style>{`@media (max-width: 900px) { .behaviour-grid { grid-template-columns: 1fr !important; } }`}</style>
     </TeacherLayout>
   );
 }

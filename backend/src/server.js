@@ -8,6 +8,24 @@ const adminRoutes   = require('./routes/adminRoutes');
 const { seedData }  = require('./scripts/seed');
 const { seedAdminData } = require('./scripts/seedAdmin');
 
+// Pre-load all models so Mongoose registers schemas and creates indexes on startup
+require('./models/Student');
+require('./models/Teacher');
+require('./models/School');
+require('./models/Program');
+require('./models/Attendance');
+require('./models/Assessment');
+require('./models/HealthRecord');
+require('./models/BehaviourRecord');
+require('./models/Alert');
+require('./models/Analytics');
+require('./models/Report');
+require('./models/ActivityLog');
+require('./models/ProgramEnrollment');
+require('./models/AlumniRecord');
+require('./models/Task');
+require('./models/Applicant');
+
 const app  = express();
 const PORT = process.env.PORT || 5000;
 

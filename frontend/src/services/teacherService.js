@@ -163,7 +163,11 @@ export async function getStudents(filters = {}) {
       avatarColor: s.avatarColor,
       attendance: { percentage: s.attendance.percentage, todayStatus: s.attendance.todayStatus },
       performance: { current: s.performance.current, trend: s.performance.trend, change: s.performance.change },
-      behaviour: { communication: s.behaviour.communication, behaviourPoints: s.behaviour.behaviourPoints },
+      behaviour: { 
+        communication: s.behaviour.communication, 
+        behaviourPoints: s.behaviour.behaviourPoints,
+        overallSelIndex: Math.round(((s.behaviour.communication || 7) + (s.behaviour.behaviourPoints || 8)) / 2 * 10) / 10 
+      },
       health: { bmi: s.health.history[s.health.history.length - 1]?.bmi || null, bmiStatus: s.health.history[s.health.history.length - 1]?.bmiStatus || 'N/A' },
       status: s.status,
       needsAttention: s.needsAttention,
@@ -390,15 +394,21 @@ export async function getBehaviourList(filters = {}) {
   }
 }
 
-export async function saveBehaviourRecord({ studentId, communication, behaviourPoints, observation }) {
+export async function saveBehaviourRecord({ studentId, selfAwareness, selfManagement, socialAwareness, relationshipSkills, responsibleDecisionMaking, observation }) {
   try {
-    const data = await apiFetch('/teacher/behaviour', { method: 'post', data: { studentId, communication, behaviourPoints, observation } });
+    const data = await apiFetch('/teacher/behaviour', { 
+      method: 'post', 
+      data: { studentId, selfAwareness, selfManagement, socialAwareness, relationshipSkills, responsibleDecisionMaking, observation } 
+    });
     return data;
   } catch {
     await delay(400);
     _behaviourOverrides[studentId] = {
-      communication,
-      behaviourPoints,
+      selfAwareness,
+      selfManagement,
+      socialAwareness,
+      relationshipSkills,
+      responsibleDecisionMaking,
       recentObservation: observation,
       lastUpdated: new Date().toISOString().split('T')[0],
     };

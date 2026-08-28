@@ -5,7 +5,11 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/scripts/seed.js"
+    "seed": "node src/scripts/seed.js",
+    "seed:admin": "node src/scripts/seedAdmin.js",
+    "migrate": "node src/scripts/migrate.js",
+    "migrate:student-refs": "node src/scripts/migrateStudentRefs.js",
+    "seed:v3": "node src/scripts/seedV3.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

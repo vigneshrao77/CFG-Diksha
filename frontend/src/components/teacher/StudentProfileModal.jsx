@@ -95,8 +95,8 @@ export default function StudentProfileModal({ studentId, onClose }) {
               {[
                 { label: 'Attendance', value: `${student.attendance?.percentage}%` },
                 { label: 'Performance', value: `${student.performance?.current}%` },
-                { label: 'Communication', value: `${student.behaviour?.communication}/10` },
-                { label: 'Behaviour', value: `${student.behaviour?.behaviourPoints}/10` },
+                { label: 'Overall SEL', value: `${student.behaviour?.overallSelIndex || 8}/10` },
+                { label: 'Status', value: student.status?.toUpperCase() || 'ACTIVE' },
               ].map((stat) => (
                 <div key={stat.label} style={{
                   background: 'rgba(255,255,255,0.1)',
@@ -138,8 +138,11 @@ export default function StudentProfileModal({ studentId, onClose }) {
                 <div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)', marginBottom: 'var(--sp-6)' }}>
                     <div>
-                      <div className="section-heading">Contact Info</div>
+                      <div className="section-heading">Contact & Demographics</div>
                       {[
+                        { label: 'Date of Birth', value: student.dateOfBirth || 'Unknown' },
+                        { label: 'Age', value: student.age ? `${student.age} years` : 'Unknown' },
+                        { label: 'Gender', value: student.gender || 'Unknown' },
                         { label: 'Email', value: student.email },
                         { label: 'Phone', value: student.phone },
                         { label: 'Parent', value: student.parentName },
@@ -148,7 +151,7 @@ export default function StudentProfileModal({ studentId, onClose }) {
                         { label: 'Joined', value: student.joinDate },
                       ].map((row) => (
                         <div key={row.label} style={{ display: 'flex', gap: 8, marginBottom: 8, fontSize: 14 }}>
-                          <span style={{ color: 'var(--slate-400)', minWidth: 90, fontWeight: 600, fontSize: 12 }}>{row.label}</span>
+                          <span style={{ color: 'var(--slate-400)', minWidth: 100, fontWeight: 600, fontSize: 12 }}>{row.label}</span>
                           <span style={{ color: 'var(--slate-700)' }}>{row.value}</span>
                         </div>
                       ))}
@@ -240,11 +243,11 @@ export default function StudentProfileModal({ studentId, onClose }) {
                       <thead>
                         <tr>
                           <th>Period</th>
+                          <th>Subject</th>
                           <th>Assignment</th>
                           <th>Test</th>
                           <th>Discipline</th>
                           <th>Notes</th>
-                          <th>ELA</th>
                           <th>Total</th>
                           <th>%</th>
                         </tr>
@@ -253,11 +256,11 @@ export default function StudentProfileModal({ studentId, onClose }) {
                         {student.assessments?.history?.map((a) => (
                           <tr key={a.period}>
                             <td style={{ fontWeight: 600 }}>{a.period}</td>
+                            <td style={{ color: 'var(--slate-500)' }}>{a.subject || 'General'}</td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>{a.assignment}/20</td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>{a.test}/5</td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>{a.discipline}/5</td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>{a.notes}/5</td>
-                            <td style={{ fontFamily: 'var(--font-mono)' }}>{a.ela}/5</td>
                             <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{a.total}/40</td>
                             <td><StatusBadge variant={a.percentage >= 75 ? 'high' : a.percentage >= 50 ? 'medium' : 'low'} label={`${a.percentage}%`} showDot={false} /></td>
                           </tr>
@@ -287,7 +290,6 @@ export default function StudentProfileModal({ studentId, onClose }) {
                     ))}
                   </div>
 
-                  {/* Calendar-style attendance dots */}
                   <div className="section-heading">Last 30 Days</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {student.attendance?.history?.map((day) => (
@@ -326,7 +328,6 @@ export default function StudentProfileModal({ studentId, onClose }) {
                 <div>
                   {student.health?.history?.length > 0 ? (
                     <>
-                      {/* Latest record */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)', marginBottom: 'var(--sp-5)' }}>
                         {(() => {
                           const latest = student.health.history[student.health.history.length - 1];
@@ -346,7 +347,6 @@ export default function StudentProfileModal({ studentId, onClose }) {
                         <StatusBadge variant={student.health.history[student.health.history.length - 1].bmiStatus === 'Reference range' ? 'stable' : 'attention'} label={student.health.history[student.health.history.length - 1].bmiStatus} />
                       </div>
 
-                      {/* BMI trend */}
                       <div className="section-heading">BMI Trend</div>
                       <ResponsiveContainer width="100%" height={160}>
                         <LineChart data={student.health.history}>
@@ -385,37 +385,24 @@ export default function StudentProfileModal({ studentId, onClose }) {
               {/* BEHAVIOUR TAB */}
               {activeTab === 'Behaviour' && (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-4)', marginBottom: 'var(--sp-5)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)', marginBottom: 'var(--sp-5)' }}>
                     {[
-                      { label: 'Communication', value: student.behaviour?.communication, color: 'var(--ink-indigo)', max: 10 },
-                      { label: 'Behaviour', value: student.behaviour?.behaviourPoints, color: 'var(--banyan-green)', max: 10 },
+                      { label: 'Overall SEL Index', value: student.behaviour?.overallSelIndex, color: 'var(--ink-indigo)' },
+                      { label: 'Self-Awareness', value: student.behaviour?.selfAwareness, color: 'var(--banyan-green)' },
+                      { label: 'Self-Management', value: student.behaviour?.selfManagement, color: 'var(--coral-rose)' },
+                      { label: 'Social Awareness', value: student.behaviour?.socialAwareness, color: 'var(--sunflower)' },
+                      { label: 'Relationship Skills', value: student.behaviour?.relationshipSkills, color: 'var(--banyan-green)' },
+                      { label: 'Decision Making', value: student.behaviour?.responsibleDecisionMaking, color: 'var(--slate-600)' },
                     ].map((s) => (
-                      <div key={s.label} style={{ background: `${s.color}10`, border: `1px solid ${s.color}30`, borderRadius: 10, padding: 'var(--sp-5)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-3)' }}>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--slate-600)' }}>{s.label}</span>
-                          <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.6rem', fontWeight: 700, color: s.color }}>{s.value}/10</span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="progress-fill" style={{ width: `${(s.value / 10) * 100}%`, background: s.color }} />
+                      <div key={s.label} style={{ background: `${s.color}10`, border: `1px solid ${s.color}30`, borderRadius: 10, padding: 'var(--sp-3)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--slate-600)', marginBottom: 'var(--sp-1)', textAlign: 'center' }}>{s.label}</span>
+                          <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 700, color: s.color }}>{s.value}/10</span>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Behaviour trend chart */}
-                  <div className="section-heading">Trend (8 Weeks)</div>
-                  <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={student.behaviour?.history || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--slate-100)" />
-                      <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--slate-400)' }} />
-                      <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: 'var(--slate-400)' }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line type="monotone" dataKey="communication" name="Communication" stroke="var(--ink-indigo)" strokeWidth={2} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="behaviour" name="Behaviour" stroke="var(--banyan-green)" strokeWidth={2} dot={{ r: 3 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-
-                  {/* AI Insight */}
                   <div style={{
                     marginTop: 'var(--sp-5)',
                     background: 'var(--ink-indigo-light)',
@@ -427,14 +414,14 @@ export default function StudentProfileModal({ studentId, onClose }) {
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontSize: 16 }}>💡</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-indigo)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        AI Insight (Demo)
+                        AI Insight (CASEL Summary)
                       </span>
                     </div>
                     <p style={{ fontSize: 13, color: 'var(--slate-600)', lineHeight: 1.7, margin: 0 }}>
                       {student.behaviour?.aiInsight}
                     </p>
                     <p style={{ fontSize: 11, color: 'var(--slate-400)', marginTop: 8 }}>
-                      Last updated: {student.behaviour?.lastUpdated} · For informational use only
+                      Last updated: {student.behaviour?.lastUpdated}
                     </p>
                   </div>
 

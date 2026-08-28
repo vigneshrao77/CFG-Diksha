@@ -16,6 +16,8 @@ const schoolSchema = new mongoose.Schema({
   established:      { type: String },
   head:             { type: String },
   programs:         [{ type: String }],
+  // ── NEW: Back-references ─────────────────────────────────────
+  teachers:         [{ type: mongoose.Schema.Types.ObjectId, ref: 'Teacher' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);
