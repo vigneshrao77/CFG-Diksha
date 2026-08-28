@@ -1,0 +1,89 @@
+:root {
+  /* Colors */
+  --color-ink-indigo: #1E3A5F;
+  --color-ink-indigo-dark: #142742;
+  --color-ink-indigo-light: #2A4F7C;
+  --color-marigold: #F2A93B;
+  --color-marigold-hover: #E09627;
+  --color-marigold-bg: #FEF6EA;
+  --color-banyan-green: #3F8F5F;
+  --color-banyan-green-bg: #EDF7F1;
+  --color-kumkum-red: #C1473A;
+  --color-kumkum-red-bg: #FDF2F0;
+  
+  --color-bg-offwhite: #F7F7F5;
+  --color-surface-white: #FFFFFF;
+
+  --color-slate-900: #0F172A;
+  --color-slate-800: #1E293B;
+  --color-slate-700: #334155;
+  --color-slate-600: #475569;
+  --color-slate-500: #64748B;
+  --color-slate-400: #94A3B8;
+  --color-slate-300: #CBD5E1;
+  --color-slate-200: #E2E8F0;
+  --color-slate-100: #F1F5F9;
+
+  /* Typography */
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Radius */
+  --radius-chip: 4px;
+  --radius-btn: 8px;
+  --radius-card: 12px;
+  --radius-modal: 20px;
+  --radius-full: 9999px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03);
+  --shadow-dropdown: 0 10px 25px -5px rgba(30, 58, 95, 0.1), 0 8px 10px -6px rgba(30, 58, 95, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-offwhite);
+  color: var(--color-slate-800);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Impact Numbers & Storytelling Headlines */
+h1, h2, h3, .font-serif, .impact-number {
+  font-family: var(--font-serif);
+}
+
+/* Precision Mono values */
+.font-mono, .mono-val, .timestamp, .code-id {
+  font-family: var(--font-mono);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-offwhite);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: var(--radius-full);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
