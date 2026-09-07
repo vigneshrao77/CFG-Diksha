@@ -5,6 +5,7 @@ backend/node_modules/
 */node_modules/
 .pnp
 .pnp.js
+.pnpm-store/
 
 # Production build
 dist/
@@ -16,6 +17,8 @@ out/
 # Environment variables
 .env
 .env.*
+.env.local
+.env.*.local
 !.env.example
 !*/.env.example
 frontend/.env

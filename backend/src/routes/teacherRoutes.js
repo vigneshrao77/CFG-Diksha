@@ -11,6 +11,10 @@ const {
   getClasses,
 } = require('../controllers/teacherController');
 
+router.get('/health', (req, res) => {
+  res.json({ success: true, message: 'Teacher API route operational' });
+});
+
 // Dashboard
 router.get('/dashboard', getDashboard);
 

@@ -1,26 +1,272 @@
-/**
- * CFG-Diksha Mock Data
- * Comprehensive dataset for 12 students covering all teacher module features.
- * Also exports legacy stubs for admin compatibility.
- *
- * Student profiles cover:
- *  - High performer      (Arjun Sharma, Aisha Khan)
- *  - Improving           (Priya Patel, Kavya Menon, Aryan Singh)
- *  - Stable              (Ravi Kumar, Dev Verma, Lakshmi Iyer)
- *  - Declining (attention)(Meena Reddy, Rohan Gupta, Sneha Joshi)
- *  - Low attendance      (Suresh Nair)
- *
- * Performance Decline Threshold: -8% from previous period → flagged for attention.
- */
+// ============================================================
+// STUDENT MODULE MOCK DATA
+// ============================================================
+export const MOCK_STUDENT_PROFILE = {
+  studentId: 'ST001',
+  name: 'Sahasra V.',
+  class: 'Class 10',
+  section: 'A',
+  school: 'Diksha Model High School',
+  batch: '2025-2026',
+  age: 15,
+  health: {
+    height: 162,
+    weight: 54,
+    bmi: 20.6,
+    lastCheckupDate: '2026-08-15'
+  },
+  attendance: {
+    presentDays: 22,
+    absentDays: 2,
+    percentage: 91.6
+  },
+  behaviour: {
+    disciplineScore: 92,
+    points: 45,
+    observations: [
+      'Active participant in group discussions.',
+      'Exhibits high empathy during team tasks.'
+    ],
+    teacherFeedback: 'Sahasra demonstrates remarkable emotional maturity and steady academic focus this term.'
+  },
+  monthlyAcademics: [
+    { month: '2026-06', assignmentScore: 16, assignmentMax: 20, percentage: 80, previousMonthComparison: 0 },
+    { month: '2026-07', assignmentScore: 17, assignmentMax: 20, percentage: 85, previousMonthComparison: 5 },
+    { month: '2026-08', assignmentScore: 18, assignmentMax: 20, percentage: 90, previousMonthComparison: 5 }
+  ],
+  monthlySEL: [
+    {
+      month: '2026-06',
+      rawScore: 84,
+      maxScore: 120,
+      percentage: 70,
+      dimensions: {
+        selfAwareness: 70,
+        selfManagement: 65,
+        empathy: 75,
+        communication: 72,
+        teamwork: 68,
+        responsibleDecisionMaking: 70
+      }
+    },
+    {
+      month: '2026-07',
+      rawScore: 90,
+      maxScore: 120,
+      percentage: 75,
+      dimensions: {
+        selfAwareness: 75,
+        selfManagement: 70,
+        empathy: 80,
+        communication: 78,
+        teamwork: 72,
+        responsibleDecisionMaking: 75
+      }
+    },
+    {
+      month: '2026-08',
+      rawScore: 96,
+      maxScore: 120,
+      percentage: 80,
+      dimensions: {
+        selfAwareness: 80,
+        selfManagement: 70,
+        empathy: 85,
+        communication: 90,
+        teamwork: 75,
+        responsibleDecisionMaking: 80
+      }
+    }
+  ],
+  alerts: [
+    {
+      id: 'ALT01',
+      title: 'Communication Growth',
+      message: 'Your communication score improved by 12% this month! Keep up the excellent teamwork.',
+      type: 'improvement',
+      date: '2026-08-20',
+      isRead: false
+    },
+    {
+      id: 'ALT02',
+      title: 'Assignment Performance',
+      message: 'Great job scoring 18/20 in your August monthly assignment.',
+      type: 'academic',
+      date: '2026-08-18',
+      isRead: false
+    }
+  ]
+};
 
-// --- Avatar colour seeds (deterministic by student index) ---
+export const MOCK_LEADERBOARD_MONTHS = [
+  { id: '2026-08', name: 'August 2026' },
+  { id: '2026-07', name: 'July 2026' },
+  { id: '2026-06', name: 'June 2026' }
+];
+
+export const MOCK_LEADERBOARD_DATA = {
+  '2026-08': [
+    {
+      rank: 1,
+      studentId: 'ST003',
+      studentName: 'Aarav Patel',
+      assignmentScore: 19,
+      assignmentMax: 20,
+      assignmentPercentage: 95,
+      selScore: 102,
+      selMax: 120,
+      selPercentage: 85,
+      combinedScore: 90.0,
+      improvement: 3.5,
+      isMostImproved: false
+    },
+    {
+      rank: 2,
+      studentId: 'ST001',
+      studentName: 'Sahasra V.',
+      assignmentScore: 18,
+      assignmentMax: 20,
+      assignmentPercentage: 90,
+      selScore: 96,
+      selMax: 120,
+      selPercentage: 80,
+      combinedScore: 85.0,
+      improvement: 5.0,
+      isMostImproved: true
+    },
+    {
+      rank: 3,
+      studentId: 'ST002',
+      studentName: 'Rohan Sharma',
+      assignmentScore: 17,
+      assignmentMax: 20,
+      assignmentPercentage: 85,
+      selScore: 98,
+      selMax: 120,
+      selPercentage: 81.6,
+      combinedScore: 83.3,
+      improvement: 2.1,
+      isMostImproved: false
+    },
+    {
+      rank: 4,
+      studentId: 'ST004',
+      studentName: 'Ananya Gupta',
+      assignmentScore: 18,
+      assignmentMax: 20,
+      assignmentPercentage: 90,
+      selScore: 90,
+      selMax: 120,
+      selPercentage: 75,
+      combinedScore: 82.5,
+      improvement: 1.0,
+      isMostImproved: false
+    },
+    {
+      rank: 5,
+      studentId: 'ST005',
+      studentName: 'Vikram Singh',
+      assignmentScore: 16,
+      assignmentMax: 20,
+      assignmentPercentage: 80,
+      selScore: 92,
+      selMax: 120,
+      selPercentage: 76.6,
+      combinedScore: 78.3,
+      improvement: 4.2,
+      isMostImproved: false
+    }
+  ],
+  '2026-07': [
+    {
+      rank: 1,
+      studentId: 'ST003',
+      studentName: 'Aarav Patel',
+      assignmentScore: 18,
+      assignmentMax: 20,
+      assignmentPercentage: 90,
+      selScore: 99,
+      selMax: 120,
+      selPercentage: 82.5,
+      combinedScore: 86.3,
+      improvement: 1.2,
+      isMostImproved: false
+    },
+    {
+      rank: 2,
+      studentId: 'ST002',
+      studentName: 'Rohan Sharma',
+      assignmentScore: 17,
+      assignmentMax: 20,
+      assignmentPercentage: 85,
+      selScore: 93,
+      selMax: 120,
+      selPercentage: 77.5,
+      combinedScore: 81.3,
+      improvement: 1.5,
+      isMostImproved: false
+    },
+    {
+      rank: 3,
+      studentId: 'ST001',
+      studentName: 'Sahasra V.',
+      assignmentScore: 17,
+      assignmentMax: 20,
+      assignmentPercentage: 85,
+      selScore: 90,
+      selMax: 120,
+      selPercentage: 75,
+      combinedScore: 80.0,
+      improvement: 4.0,
+      isMostImproved: true
+    }
+  ]
+};
+
+export const MOCK_ACHIEVEMENTS = [
+  {
+    id: 'ACH01',
+    title: 'SEL Trailblazer',
+    category: 'Holistic Growth',
+    dateEarned: 'August 2026',
+    description: 'Scored 80%+ in monthly Social-Emotional Learning assessment.',
+    icon: 'Sparkles'
+  },
+  {
+    id: 'ACH02',
+    title: 'Master Communicator',
+    category: 'Communication',
+    dateEarned: 'August 2026',
+    description: 'Demonstrated exceptional empathy and verbal clarity in speech analysis.',
+    icon: 'MessageSquare'
+  },
+  {
+    id: 'ACH03',
+    title: 'Top 3 Podium Rank',
+    category: 'Leaderboard',
+    dateEarned: 'August 2026',
+    description: 'Achieved Rank 2 on the Monthly Holistic Growth Leaderboard.',
+    icon: 'Trophy'
+  },
+  {
+    id: 'ACH04',
+    title: 'Perfect Attendance',
+    category: 'Discipline',
+    dateEarned: 'July 2026',
+    description: 'Maintained over 90% attendance throughout the month.',
+    icon: 'Award'
+  }
+];
+
+// ============================================================
+// TEACHER MODULE MOCK DATA (12 Students)
+// ============================================================
 const AVATAR_COLORS = [
   '#1E3A5F', '#3F8F5F', '#6B48A2', '#2E7D8E',
   '#A0522D', '#1E6B5F', '#7B3F8F', '#2E5EA0',
   '#8F5F1E', '#3F5F8F', '#6B3A2E', '#2E8F5F',
 ];
 
-// --- Helper: generate weekly performance history (8 weeks) ---
 function genWeeklyPerf(finalScore, trend) {
   const weeks = [];
   const step = trend === 'improving' ? -2 : trend === 'declining' ? 2 : 0;
@@ -34,7 +280,6 @@ function genWeeklyPerf(finalScore, trend) {
   return weeks;
 }
 
-// --- Helper: generate 30-day attendance history ---
 function genAttendanceHistory(percentage) {
   const days = [];
   const today = new Date('2024-08-27');
@@ -42,7 +287,7 @@ function genAttendanceHistory(percentage) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const dayOfWeek = d.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) continue; // skip weekends
+    if (dayOfWeek === 0 || dayOfWeek === 6) continue;
     const present = Math.random() * 100 < percentage;
     days.push({
       date: d.toISOString().split('T')[0],
@@ -52,7 +297,6 @@ function genAttendanceHistory(percentage) {
   return days;
 }
 
-// --- Helper: generate assessment history (4 periods) ---
 function genAssessmentHistory(currentTotal) {
   const periods = ['Period 1', 'Period 2', 'Period 3', 'Period 4'];
   return periods.map((period, i) => {
@@ -76,7 +320,6 @@ function genAssessmentHistory(currentTotal) {
   });
 }
 
-// --- Helper: generate health records ---
 function genHealthHistory(height, weight) {
   const records = [];
   const months = ['2024-02-15', '2024-05-10', '2024-08-15'];
@@ -95,7 +338,6 @@ function genHealthHistory(height, weight) {
   return records;
 }
 
-// --- Helper: behaviour trend history ---
 function genBehaviourHistory(comm, behav, trend) {
   const weeks = [];
   for (let i = 8; i >= 1; i--) {
@@ -110,11 +352,7 @@ function genBehaviourHistory(comm, behav, trend) {
   return weeks;
 }
 
-// ============================================================
-// MOCK STUDENTS DATA
-// ============================================================
 export const MOCK_STUDENTS = [
-  // 1 — HIGH PERFORMER
   {
     id: 'S001',
     name: 'Arjun Sharma',
@@ -151,7 +389,7 @@ export const MOCK_STUDENTS = [
       behaviourPoints: 9,
       recentObservation: 'Actively participates in group discussions. Shows leadership in collaborative tasks.',
       trend: 'stable',
-      aiInsight: 'Arjun consistently demonstrates strong communication skills and peer leadership. Engagement during group activities is among the highest in the class.',
+      aiInsight: 'Arjun consistently demonstrates strong communication skills and peer leadership.',
       lastUpdated: '2024-08-20',
       history: genBehaviourHistory(9, 9, 'stable'),
     },
@@ -165,8 +403,6 @@ export const MOCK_STUDENTS = [
     notifications: [],
     needsAttention: false,
   },
-
-  // 2 — IMPROVING
   {
     id: 'S002',
     name: 'Priya Patel',
@@ -203,7 +439,7 @@ export const MOCK_STUDENTS = [
       behaviourPoints: 8,
       recentObservation: 'Has been asking more questions in class. Shows growing confidence.',
       trend: 'improving',
-      aiInsight: 'Priya\'s classroom participation has increased significantly over the past month. Communication clarity in written work has also improved.',
+      aiInsight: 'Priya\'s classroom participation has increased significantly over the past month.',
       lastUpdated: '2024-08-22',
       history: genBehaviourHistory(8, 8, 'improving'),
     },
@@ -217,8 +453,6 @@ export const MOCK_STUDENTS = [
     notifications: [],
     needsAttention: false,
   },
-
-  // 3 — STABLE
   {
     id: 'S003',
     name: 'Ravi Kumar',
@@ -255,7 +489,7 @@ export const MOCK_STUDENTS = [
       behaviourPoints: 7,
       recentObservation: 'Steady performance. Works well individually but less engaged in group settings.',
       trend: 'stable',
-      aiInsight: 'Ravi maintains consistent performance across assessments. One-on-one interaction tends to yield better results than group settings.',
+      aiInsight: 'Ravi maintains consistent performance across assessments.',
       lastUpdated: '2024-08-18',
       history: genBehaviourHistory(7, 7, 'stable'),
     },
@@ -269,8 +503,6 @@ export const MOCK_STUDENTS = [
     notifications: [],
     needsAttention: false,
   },
-
-  // 4 — DECLINING ⚠️ (NEEDS ATTENTION)
   {
     id: 'S004',
     name: 'Meena Reddy',
@@ -305,9 +537,9 @@ export const MOCK_STUDENTS = [
     behaviour: {
       communication: 6,
       behaviourPoints: 6,
-      recentObservation: 'Seems distracted during lessons. Engagement has visibly reduced compared to previous months.',
+      recentObservation: 'Seems distracted during lessons. Engagement has visibly reduced.',
       trend: 'declining',
-      aiInsight: 'Meena\'s participation has decreased over the last three weeks. Assessment scores have declined and she has been absent more frequently. A check-in conversation may help identify challenges.',
+      aiInsight: 'Meena\'s participation has decreased over the last three weeks.',
       lastUpdated: '2024-08-21',
       history: genBehaviourHistory(6, 6, 'declining'),
     },
@@ -321,449 +553,20 @@ export const MOCK_STUDENTS = [
     notifications: [],
     needsAttention: true,
     attentionReason: 'Performance declined 16% from previous period',
-  },
-
-  // 5 — LOW ATTENDANCE ⚠️
-  {
-    id: 'S005',
-    name: 'Suresh Nair',
-    class: 'Class B',
-    group: 'Afternoon',
-    initial: 'SN',
-    avatarColor: AVATAR_COLORS[4],
-    email: 'suresh.nair@diksha.edu',
-    phone: '9876543250',
-    parentName: 'Anitha Nair',
-    parentPhone: '9876543251',
-    address: '77 Koramangala, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 58,
-      present: 35,
-      absent: 25,
-      total: 60,
-      history: genAttendanceHistory(58),
-      todayStatus: 'absent',
-    },
-    health: {
-      history: genHealthHistory(165, 58),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 12, test: 3, discipline: 3, notes: 2, ela: 3, total: 23, percentage: 58 },
-      history: genAssessmentHistory(23),
-      previousTotal: 24,
-      previousPercentage: 60,
-    },
-    behaviour: {
-      communication: 5,
-      behaviourPoints: 6,
-      recentObservation: 'Misses many classes. When present, is cooperative but lacks continuity.',
-      trend: 'stable',
-      aiInsight: 'Suresh\'s attendance at 58% is significantly below the group average. Missed sessions directly impact assessment readiness. A parent conversation may be warranted.',
-      lastUpdated: '2024-08-15',
-      history: genBehaviourHistory(5, 6, 'stable'),
-    },
-    performance: {
-      current: 58,
-      previous: 60,
-      change: -2,
-      trend: 'stable',
-      weeklyHistory: genWeeklyPerf(58, 'stable'),
-    },
-    notifications: [],
-    needsAttention: true,
-    attentionReason: 'Attendance critically low at 58%',
-  },
-
-  // 6 — IMPROVING BEHAVIOUR
-  {
-    id: 'S006',
-    name: 'Kavya Menon',
-    class: 'Class B',
-    group: 'Afternoon',
-    initial: 'KM',
-    avatarColor: AVATAR_COLORS[5],
-    email: 'kavya.menon@diksha.edu',
-    phone: '9876543260',
-    parentName: 'Priya Menon',
-    parentPhone: '9876543261',
-    address: '34 Whitefield, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 88,
-      present: 53,
-      absent: 7,
-      total: 60,
-      history: genAttendanceHistory(88),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(160, 50),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 15, test: 4, discipline: 4, notes: 4, ela: 4, total: 31, percentage: 78 },
-      history: genAssessmentHistory(31),
-      previousTotal: 28,
-      previousPercentage: 70,
-    },
-    behaviour: {
-      communication: 8,
-      behaviourPoints: 8,
-      recentObservation: 'Communication skills have improved notably. More collaborative in group tasks.',
-      trend: 'improving',
-      aiInsight: 'Kavya\'s communication score has risen from 5/10 to 8/10 over 8 weeks. Group activity engagement and verbal participation have both improved substantially.',
-      lastUpdated: '2024-08-23',
-      history: genBehaviourHistory(8, 8, 'improving'),
-    },
-    performance: {
-      current: 78,
-      previous: 70,
-      change: +8,
-      trend: 'improving',
-      weeklyHistory: genWeeklyPerf(78, 'improving'),
-    },
-    notifications: [],
-    needsAttention: false,
-  },
-
-  // 7 — DECLINING + LOW BEHAVIOUR ⚠️ (NEEDS ATTENTION)
-  {
-    id: 'S007',
-    name: 'Rohan Gupta',
-    class: 'Class B',
-    group: 'Afternoon',
-    initial: 'RG',
-    avatarColor: AVATAR_COLORS[6],
-    email: 'rohan.gupta@diksha.edu',
-    phone: '9876543270',
-    parentName: 'Amit Gupta',
-    parentPhone: '9876543271',
-    address: '56 HSR Layout, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 80,
-      present: 48,
-      absent: 12,
-      total: 60,
-      history: genAttendanceHistory(80),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(170, 65),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 11, test: 3, discipline: 2, notes: 2, ela: 3, total: 21, percentage: 53 },
-      history: genAssessmentHistory(21),
-      previousTotal: 28,
-      previousPercentage: 70,
-    },
-    behaviour: {
-      communication: 5,
-      behaviourPoints: 4,
-      recentObservation: 'Frequently off-task. Has had minor conflicts with peers. Needs structured support.',
-      trend: 'declining',
-      aiInsight: 'Rohan\'s behaviour and communication scores have both declined over 6 weeks. Combined with declining academic performance, targeted support is recommended. Consider a structured check-in.',
-      lastUpdated: '2024-08-24',
-      history: genBehaviourHistory(5, 4, 'declining'),
-    },
-    performance: {
-      current: 53,
-      previous: 70,
-      change: -17,
-      trend: 'declining',
-      weeklyHistory: genWeeklyPerf(53, 'declining'),
-    },
-    notifications: [],
-    needsAttention: true,
-    attentionReason: 'Performance declined 24% and behaviour score critical',
-  },
-
-  // 8 — HIGH PERFORMER
-  {
-    id: 'S008',
-    name: 'Aisha Khan',
-    class: 'Class B',
-    group: 'Afternoon',
-    initial: 'AK',
-    avatarColor: AVATAR_COLORS[7],
-    email: 'aisha.khan@diksha.edu',
-    phone: '9876543280',
-    parentName: 'Salma Khan',
-    parentPhone: '9876543281',
-    address: '90 JP Nagar, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 98,
-      present: 59,
-      absent: 1,
-      total: 60,
-      history: genAttendanceHistory(98),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(162, 52),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 19, test: 5, discipline: 5, notes: 5, ela: 5, total: 39, percentage: 98 },
-      history: genAssessmentHistory(39),
-      previousTotal: 37,
-      previousPercentage: 93,
-    },
-    behaviour: {
-      communication: 10,
-      behaviourPoints: 10,
-      recentObservation: 'Exceptional communicator. Consistently helps peers understand concepts.',
-      trend: 'stable',
-      aiInsight: 'Aisha is the highest academic achiever in the group. Strong communication and behaviour scores reflect her positive influence on the classroom environment.',
-      lastUpdated: '2024-08-25',
-      history: genBehaviourHistory(10, 10, 'stable'),
-    },
-    performance: {
-      current: 98,
-      previous: 93,
-      change: +5,
-      trend: 'improving',
-      weeklyHistory: genWeeklyPerf(98, 'improving'),
-    },
-    notifications: [],
-    needsAttention: false,
-  },
-
-  // 9 — STABLE
-  {
-    id: 'S009',
-    name: 'Dev Verma',
-    class: 'Class C',
-    group: 'Morning',
-    initial: 'DV',
-    avatarColor: AVATAR_COLORS[8],
-    email: 'dev.verma@diksha.edu',
-    phone: '9876543290',
-    parentName: 'Rakesh Verma',
-    parentPhone: '9876543291',
-    address: '15 Marathahalli, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 83,
-      present: 50,
-      absent: 10,
-      total: 60,
-      history: genAttendanceHistory(83),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(175, 70),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 14, test: 3, discipline: 3, notes: 3, ela: 3, total: 26, percentage: 65 },
-      history: genAssessmentHistory(26),
-      previousTotal: 25,
-      previousPercentage: 63,
-    },
-    behaviour: {
-      communication: 7,
-      behaviourPoints: 7,
-      recentObservation: 'Steady and reliable. Follows instructions well. Could benefit from more active participation.',
-      trend: 'stable',
-      aiInsight: 'Dev maintains consistent performance with minimal variation. Encouraging more voluntary participation in discussions could further support his development.',
-      lastUpdated: '2024-08-19',
-      history: genBehaviourHistory(7, 7, 'stable'),
-    },
-    performance: {
-      current: 65,
-      previous: 63,
-      change: +2,
-      trend: 'stable',
-      weeklyHistory: genWeeklyPerf(65, 'stable'),
-    },
-    notifications: [],
-    needsAttention: false,
-  },
-
-  // 10 — DECLINING ⚠️ (NEEDS ATTENTION)
-  {
-    id: 'S010',
-    name: 'Sneha Joshi',
-    class: 'Class C',
-    group: 'Morning',
-    initial: 'SJ',
-    avatarColor: AVATAR_COLORS[9],
-    email: 'sneha.joshi@diksha.edu',
-    phone: '9876543300',
-    parentName: 'Geeta Joshi',
-    parentPhone: '9876543301',
-    address: '67 Banashankari, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 86,
-      present: 52,
-      absent: 8,
-      total: 60,
-      history: genAttendanceHistory(86),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(157, 49),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 13, test: 3, discipline: 3, notes: 3, ela: 3, total: 25, percentage: 63 },
-      history: genAssessmentHistory(25),
-      previousTotal: 32,
-      previousPercentage: 80,
-    },
-    behaviour: {
-      communication: 6,
-      behaviourPoints: 7,
-      recentObservation: 'Has become quieter recently. Previously very vocal and enthusiastic.',
-      trend: 'declining',
-      aiInsight: 'Sneha\'s scores have declined noticeably from her earlier high performance. The change in communication pattern may indicate external stress factors. A supportive check-in is advisable.',
-      lastUpdated: '2024-08-22',
-      history: genBehaviourHistory(6, 7, 'declining'),
-    },
-    performance: {
-      current: 63,
-      previous: 80,
-      change: -17,
-      trend: 'declining',
-      weeklyHistory: genWeeklyPerf(63, 'declining'),
-    },
-    notifications: [],
-    needsAttention: true,
-    attentionReason: 'Performance dropped sharply from 80% to 63%',
-  },
-
-  // 11 — IMPROVING
-  {
-    id: 'S011',
-    name: 'Aryan Singh',
-    class: 'Class C',
-    group: 'Morning',
-    initial: 'AS',
-    avatarColor: AVATAR_COLORS[10],
-    email: 'aryan.singh@diksha.edu',
-    phone: '9876543310',
-    parentName: 'Manish Singh',
-    parentPhone: '9876543311',
-    address: '29 Rajajinagar, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 87,
-      present: 52,
-      absent: 8,
-      total: 60,
-      history: genAttendanceHistory(87),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(174, 67),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 15, test: 4, discipline: 4, notes: 4, ela: 3, total: 30, percentage: 75 },
-      history: genAssessmentHistory(30),
-      previousTotal: 24,
-      previousPercentage: 60,
-    },
-    behaviour: {
-      communication: 7,
-      behaviourPoints: 8,
-      recentObservation: 'Shows consistent improvement. Responds well to constructive feedback.',
-      trend: 'improving',
-      aiInsight: 'Aryan has shown a 15-point improvement in assessment scores over two periods. His positive response to structured feedback indicates strong growth mindset.',
-      lastUpdated: '2024-08-23',
-      history: genBehaviourHistory(7, 8, 'improving'),
-    },
-    performance: {
-      current: 75,
-      previous: 60,
-      change: +15,
-      trend: 'improving',
-      weeklyHistory: genWeeklyPerf(75, 'improving'),
-    },
-    notifications: [],
-    needsAttention: false,
-  },
-
-  // 12 — STABLE HIGH
-  {
-    id: 'S012',
-    name: 'Lakshmi Iyer',
-    class: 'Class C',
-    group: 'Morning',
-    initial: 'LI',
-    avatarColor: AVATAR_COLORS[11],
-    email: 'lakshmi.iyer@diksha.edu',
-    phone: '9876543320',
-    parentName: 'Radha Iyer',
-    parentPhone: '9876543321',
-    address: '11 Basavanagudi, Bangalore',
-    joinDate: '2024-01-15',
-    status: 'active',
-    attendance: {
-      percentage: 92,
-      present: 55,
-      absent: 5,
-      total: 60,
-      history: genAttendanceHistory(92),
-      todayStatus: 'present',
-    },
-    health: {
-      history: genHealthHistory(163, 53),
-    },
-    assessments: {
-      current: { period: 'Period 4', assignment: 17, test: 4, discipline: 5, notes: 4, ela: 5, total: 35, percentage: 88 },
-      history: genAssessmentHistory(35),
-      previousTotal: 34,
-      previousPercentage: 85,
-    },
-    behaviour: {
-      communication: 9,
-      behaviourPoints: 9,
-      recentObservation: 'Calm and focused. Assists peers without prompting. Strong positive influence.',
-      trend: 'stable',
-      aiInsight: 'Lakshmi maintains a high performance trajectory with consistent behaviour scores. Her peer support role benefits the overall classroom dynamic.',
-      lastUpdated: '2024-08-25',
-      history: genBehaviourHistory(9, 9, 'stable'),
-    },
-    performance: {
-      current: 88,
-      previous: 85,
-      change: +3,
-      trend: 'stable',
-      weeklyHistory: genWeeklyPerf(88, 'stable'),
-    },
-    notifications: [],
-    needsAttention: false,
-  },
+  }
 ];
 
-// ============================================================
-// DERIVED DATA HELPERS
-// ============================================================
+export const CLASS_PERFORMANCE_TREND_WEEKLY = [
+  { week: 'Wk 1', score: 72 },
+  { week: 'Wk 2', score: 74 },
+  { week: 'Wk 3', score: 73 },
+  { week: 'Wk 4', score: 76 },
+  { week: 'Wk 5', score: 75 },
+  { week: 'Wk 6', score: 78 },
+  { week: 'Wk 7', score: 80 },
+  { week: 'Wk 8', score: 82 },
+];
 
-/** Class average performance trend (weekly, 8 weeks) */
-export const CLASS_PERFORMANCE_TREND_WEEKLY = (() => {
-  const weeks = 8;
-  return Array.from({ length: weeks }, (_, i) => {
-    const label = `Wk ${i + 1}`;
-    const avgScore =
-      Math.round(
-        MOCK_STUDENTS.reduce((sum, s) => {
-          const entry = s.performance.weeklyHistory[i];
-          return sum + (entry ? entry.score : 70);
-        }, 0) / MOCK_STUDENTS.length
-      );
-    return { week: label, score: avgScore };
-  });
-})();
-
-/** Class average performance trend (monthly) */
 export const CLASS_PERFORMANCE_TREND_MONTHLY = [
   { month: 'Mar', score: 68 },
   { month: 'Apr', score: 70 },
@@ -773,31 +576,16 @@ export const CLASS_PERFORMANCE_TREND_MONTHLY = [
   { month: 'Aug', score: 75 },
 ];
 
-/** Today's attendance summary */
-export const TODAY_ATTENDANCE = (() => {
-  const present = MOCK_STUDENTS.filter((s) => s.attendance.todayStatus === 'present').length;
-  const absent = MOCK_STUDENTS.length - present;
-  return { present, absent, total: MOCK_STUDENTS.length, percentage: Math.round((present / MOCK_STUDENTS.length) * 100) };
-})();
-
-/** Average class performance */
-export const AVG_PERFORMANCE = Math.round(
-  MOCK_STUDENTS.reduce((s, st) => s + st.performance.current, 0) / MOCK_STUDENTS.length
-);
-
-/** Students needing attention */
+export const TODAY_ATTENDANCE = { present: 10, absent: 2, total: 12, percentage: 83 };
+export const AVG_PERFORMANCE = 76;
 export const STUDENTS_NEEDING_ATTENTION = MOCK_STUDENTS.filter((s) => s.needsAttention);
 
-/** Recent activity feed */
 export const RECENT_ACTIVITY = [
   { id: 1, type: 'attendance', message: 'Attendance marked for Class A — Morning', time: '2 hours ago', icon: '✓', studentName: null },
   { id: 2, type: 'health', message: 'Health checkup recorded for Arjun Sharma', time: '1 day ago', icon: '♥', studentName: 'Arjun Sharma' },
   { id: 3, type: 'assessment', message: 'Assessments submitted for Period 4 — Class B', time: '2 days ago', icon: '📝', studentName: null },
-  { id: 4, type: 'behaviour', message: 'Behaviour points updated for Rohan Gupta', time: '3 days ago', icon: '⭐', studentName: 'Rohan Gupta' },
-  { id: 5, type: 'alert', message: 'Performance alert sent to Meena Reddy', time: '4 days ago', icon: '🔔', studentName: 'Meena Reddy' },
 ];
 
-/** Stored alerts (teacher → student) */
 export let MOCK_ALERTS = [
   {
     id: 'A001',
@@ -806,14 +594,13 @@ export let MOCK_ALERTS = [
     teacherId: 'T001',
     type: 'performance',
     title: 'Performance Check-In',
-    message: 'Your recent assessment performance has decreased. Please review your recent work and speak with your teacher at the earliest convenience.',
+    message: 'Your recent assessment performance has decreased. Please review your recent work with your teacher.',
     createdAt: '2024-08-23T10:30:00Z',
     read: false,
     severity: 'warning',
   },
 ];
 
-/** Teacher profile (demo) */
 export const TEACHER_PROFILE = {
   id: 'T001',
   name: 'Ms. Anika Reddy',
@@ -823,7 +610,7 @@ export const TEACHER_PROFILE = {
   classes: ['Class A', 'Class B', 'Class C'],
 };
 
-// --- Admin compatibility stubs ---
+// Admin compatibility stubs
 export const mockSchools = [];
 export const mockAreas = [];
 export const mockPrograms = [];
@@ -835,4 +622,3 @@ export const mockHealthData = { screeningCoverage: [], bmiDistribution: [], diet
 export const mockDashboardMetrics = {};
 export const mockComparisonMetrics = [];
 export const mockCohorts = [];
-
